@@ -33,10 +33,11 @@ the docker-compose file mount the cred file under this name.
 
 3. Run
 
-    
+
     docker-compose up
     
- 
+
+
 This command will run a kafka, and mysql instances, connect your webrtc- applications to them, 
 sets up a topic name `reports`, mount config files and the obtained credentials, 
 and finally open a port on 7080, so your client integration can send 
