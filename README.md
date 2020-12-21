@@ -49,7 +49,46 @@ Your observer is up and waiting for client samples to provide WebRTC Reports.
 ## Advanced Configuration
 
 TBD 
- 
 
 
+
+
+
+kafka-docker
+============
+
+Dockerfile for [WebRTC-Observer](http://github.com/ObserveRTC/webrtc-observer)
+
+The image is available directly from [Docker Hub](hhttps://hub.docker.com/repository/docker/observertc/webrtc-observer)
+
+Tags and releases
+-----------------
+
+Images are build from the same set of configuration for the Observer.
+The version format of the tag mirrors the version of the Observer.
+
+When an image is updated, all tags will be pushed with the latest updates.
+
+---
+
+## Pre-Requisites
+
+- install docker-compose [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)
+- if you want to customize any Kafka parameters, simply add them as environment variables in ```docker-compose.yml```.
+- Kafka's log4j usage can be customized by adding environment variables prefixed with ```LOG4J_```. 
+
+## Usage
+
+Start a cluster:
+
+- ```docker-compose up -d ```
+
+### Hazelcast configuration
+
+The Observer uses [hazelcast](https://hazelcast.org) as an IMDG, and all the configuration related to hazelcast 
+is in `hazelcast-config.yml`, which is automatically mounted in the docker when you run it.
+
+## Tutorials
+
+[https://observertc.org/docs/tutorials/](https://observertc.org/docs/tutorials/)
 
