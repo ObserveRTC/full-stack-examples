@@ -3,46 +3,21 @@ services:
   webrtc_observer:
     restart: always
     container_name: docker_webrtc_observer
-    image: observertc/webrtc-observer:0.5.1
+    image: observertc/webrtc-observer:0.6-alpha
     links:
       - kafka
-      - mysql
     ports:
       - 7080:7080
     environment:
       - INITIAL_WAITING_TIME_IN_S=30
       - KAFKA_HOSTS=docker_kafka:29092
-      - DATABASE_USERNAME=root
-      - DATABSE_PASSWORD=password
-      - JDBC_URL=jdbc:mysql://mysqldb:3306/WebRTCObserver
-      - MICRONAUT_CONFIG_FILES=/config.yml
+      - MICRONAUT_CONFIG_FILES=/observer-config.yml
+      - HAZELCAST_CONFIG_FILE=/hazelcast-config.yml
     depends_on:
       - kafka
-      - mysql
     volumes:
-      - ./observer-config.yml:/config.yml
-  webrtc_exporter:
-    container_name: docker_webrtc_exporter
-    image: observertc/webrtc-bigquery-exporter:0.3
-    restart: always
-    links:
-      - kafka
-    environment:
-      - INITIAL_WAITING_TIME_IN_S=20
-      - BIGQUERY_PROJECT_NAME=observertc
-      - BIGQUERY_DATASET_NAME=MyWebRTC
-      - BIGQUERY_CREATE_DATASET_IF_NOT_EXISTS=True
-      - BIGQUERY_CREATE_TABLE_IF_NOT_EXISTS=True
-      - GOOGLE_APPLICATION_CREDENTIALS=bq_credential.json
-      - KAFKA_HOSTS=docker_kafka:29092
-      - MICRONAUT_CONFIG_FILES=/config.yml
-    depends_on:
-      - kafka
-      - mysql
-    volumes:
-      - ./exporter-config.yml:/config.yml
-      - ./google_api_credentials.json:/bq_credential.json
-
+      - ./observer-config.yml:/observer-config.yml
+      - ./hazelcast-config.yml:/hazelcast-config.yml
   # Infrastructure behind the Observer
   zookeeper:
     container_name: docker_zookeeper
@@ -80,21 +55,3 @@ services:
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
-  mysql:
-    container_name: mysqldb
-    image: mysql:8.0.19
-    restart: always
-    environment:
-      MYSQL_DATABASE: WebRTCObserver
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: password
-    ports:
-      - 3306:3306
-    expose:
-      - '3306'
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-volumes:
-  my-db:
-    driver: local
