@@ -3,7 +3,7 @@ services:
   webrtc_observer:
     restart: always
     container_name: docker_webrtc_observer
-    image: observertc/webrtc-observer:0.6-alpha
+    image: observertc/webrtc-observer:0.6.0
     links:
       - kafka
     ports:
