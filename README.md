@@ -1,9 +1,11 @@
 docker-webrtc-observer
 ============
 
-Dockerfile for [WebRTC-Observer](http://github.com/ObserveRTC/webrtc-observer)
+Dockerfile for WebRTC-Observer project. 
+ * [Observer](http://github.com/ObserveRTC/observer)
+ * [Connector](http://github.com/ObserveRTC/connector)
 
-The image is available directly from [Docker Hub](hhttps://hub.docker.com/repository/docker/observertc/webrtc-observer)
+The image is available directly from [Docker Hub](hhttps://hub.docker.com/repository/docker/observertc)
 
 Tags and releases
 -----------------
@@ -27,12 +29,21 @@ When an image is updated, all tags will be pushed with the latest updates.
 In order to quickly run WebRTC-Observer on a host running Docker and Docker Compose,
 follow these steps:
 
-1. Clone this repository
+#### 1. Clone this repository
 
 
     git clone https://github.com/ObserveRTC/docker-webrtc-observer-exporter
 
-2. Run
+#### 2. Obtain credentials for BigQuery
+
+The `example-pipeline.yaml` is set up to connect to a [BigQuery](https://cloud.google.com/bigquery/docs/introduction) 
+service.
+* Obtain a [credential file](https://cloud.google.com/bigquery/docs/authentication/service-account-file) 
+  and save it in the directory you cloned this repository as `myCredentials.json`.
+* Set the `projectId`, `datasetId` to your project id and the dataset id you want 
+  to save the reports to.
+
+#### 3. Run
 
 ```shell
     docker-compose up

@@ -1,9 +1,9 @@
 version: '3.3'
 services:
-  webrtc_observer:
+  observer:
     restart: always
-    container_name: docker_webrtc_observer
-    image: observertc/webrtc-observer:0.6.0
+    container_name: docker_observertc_observer
+    image: observertc/observer:0.6.0
     links:
       - kafka
     ports:
@@ -11,13 +11,28 @@ services:
     environment:
       - INITIAL_WAITING_TIME_IN_S=30
       - KAFKA_HOSTS=docker_kafka:29092
-      - MICRONAUT_CONFIG_FILES=/observer-config.yml
-      - HAZELCAST_CONFIG_FILE=/hazelcast-config.yml
+      - MICRONAUT_CONFIG_FILES=/observer-config.yaml
+      - HAZELCAST_CONFIG_FILE=/hazelcast-config.yaml
     depends_on:
       - kafka
     volumes:
-      - ./observer-config.yml:/observer-config.yml
-      - ./hazelcast-config.yml:/hazelcast-config.yml
+      - ./observer-config.yaml:/observer-config.yaml
+      - ./hazelcast-config.yaml:/hazelcast-config.yaml
+  connector:
+    restart: always
+    container_name: docker_observertc_connector
+    image: observertc/connector:0.1.0
+    environment:
+      - INITIAL_WAITING_TIME_IN_S=30
+      - MICRONAUT_CONFIG_FILES=/connector-config.yaml
+      - PIPELINE_CONFIG_FILES=/example-pipeline.yaml
+    depends_on:
+      - observer
+      - kafka
+    volumes:
+      - ./connector-config.yaml:/connector-config.yaml
+      - ./example-pipeline.yaml:/example-pipeline.yaml
+      - ./myCredentials.json:/myCredentials.json
   # Infrastructure behind the Observer
   zookeeper:
     container_name: docker_zookeeper

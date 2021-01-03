@@ -1,0 +1,3 @@
+pipelines:
+  corePoolSize: 10
+  maxParallel: 50
