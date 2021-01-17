@@ -1,0 +1,12 @@
+observer:
+  connectors:
+    - name: "QuickStartConnector"
+      buffer:
+        maxItems: 100
+        maxWaitingTimeInS: 10
+      sink:
+        type: LoggerSink
+        config:
+          printReports: True
+
+

@@ -1,25 +1,28 @@
 name: "MyPipeline"
+meta:
+  replicas: 1
 source:
   type: KafkaSource
   config:
     topic: "reports"
     properties:
-      bootstrap:
-        servers: docker_kafka:9092
-      group:
-        id: "test-something"
-evaluator:
-  bufferThresholdNum: 100
-  bufferThresholdInS: 15
+      bootstrap.servers: ${KAFKA_HOSTS}
+      group.id: "test-something"
+decoder:
+  type: AvroDecoder
+buffer:
+  maxItems: 10000
+  maxWaitingTimeInS: 10
 sink:
   type: BigQuerySink
   config:
     credentialFile: "/myCredentials.json"
-    projectId: "myProject"
-    datasetId: "myDataset"
+    projectId: "observertc"
+    datasetId: "dev_WebRTCTry2"
+#    projectId: "myProject"
+#    datasetId: "myDataset"
     schemaCheck:
       enabled: True
       createTableIfNotExists: True
       createDatasetIfNotExists: True
-
 
