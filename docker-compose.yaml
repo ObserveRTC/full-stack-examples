@@ -3,7 +3,7 @@ services:
   observer:
     restart: always
     container_name: docker_observertc_observer
-    image: observertc/observer:0.6.1
+    image: observertc/observer:0.6.5
     ports:
       - 7080:7080
       - 7081:7081
