@@ -22,7 +22,7 @@ services:
   connector:
     restart: always
     container_name: docker_observertc_connector
-    image: observertc/connector:0.1.3
+    image: observertc/connector:0.1.5
     environment:
       - INITIAL_WAITING_TIME_IN_S=30
       - MICRONAUT_CONFIG_FILES=/connector-config.yaml
