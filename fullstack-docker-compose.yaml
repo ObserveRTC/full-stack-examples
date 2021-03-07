@@ -3,7 +3,7 @@ services:
   observer:
     restart: always
     container_name: docker_observertc_observer
-    image: observertc/observer:0.6.5
+    image: observertc/observer:0.7.0
     links:
       - kafka
     ports:
@@ -12,12 +12,12 @@ services:
     environment:
       - INITIAL_WAITING_TIME_IN_S=30
       - KAFKA_HOSTS=docker_kafka:29092
-      - MICRONAUT_CONFIG_FILES=/observer-config.yaml
+      - MICRONAUT_CONFIG_FILES=/fullstack-observer-config.yaml
       - HAZELCAST_CONFIG_FILE=/hazelcast-config.yaml
     depends_on:
       - kafka
     volumes:
-      - ./observer-config.yaml:/observer-config.yaml
+      - ./fullstack-observer-config.yaml:/fullstack-observer-config.yaml
       - ./hazelcast-config.yaml:/hazelcast-config.yaml
   connector:
     restart: always

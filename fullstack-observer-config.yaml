@@ -4,14 +4,16 @@ observer:
       uuids:
         - "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   connectors:
-    - name: "ReportSinkLogger"
+    - name: "MyKafkaReportSink"
       buffer:
         maxItems: 100
         maxWaitingTimeInS: 10
       sink:
-        type: LoggerSink
+        type: KafkaSink
         config:
-          printReports: False
+          topic: "reports"
+          properties:
+            bootstrap.servers: ${KAFKA_HOSTS}
   evaluators:
     observedPCSBufferMaxTimeInS: 10
     observedPCSBufferMaxItemNums: 10000
