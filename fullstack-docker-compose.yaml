@@ -22,18 +22,16 @@ services:
   connector:
     restart: always
     container_name: docker_observertc_connector
-    image: observertc/connector:0.1.5
+    image: observertc/connector:0.1.6
     environment:
       - INITIAL_WAITING_TIME_IN_S=30
       - MICRONAUT_CONFIG_FILES=/connector-config.yaml
-      - PIPELINE_CONFIG_FILES=/example-pipeline.yaml
       - KAFKA_HOSTS=docker_kafka:29092
     depends_on:
       - observer
       - kafka
     volumes:
       - ./connector-config.yaml:/connector-config.yaml
-      - ./example-pipeline.yaml:/example-pipeline.yaml
       - ./myCredentials.json:/myCredentials.json
   # Infrastructure behind the Observer
   zookeeper:
