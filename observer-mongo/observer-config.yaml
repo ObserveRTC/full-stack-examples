@@ -1,0 +1,9 @@
+observer:
+  sinks:
+    MyMongoSink:
+      type: MongoSink
+      config:
+        uri: "mongodb://root:password@docker_mongo:27017"
+        database: "ortc_reports"
+
+

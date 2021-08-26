@@ -4,15 +4,15 @@ observer:
       type: KafkaSink
       config:
         muxReports: true
-        muxTopic: "ortc_demo_1_reports"
+        muxTopic: "ortc_demo_2_reports"
 
         # If muxReports property is false, then each type of report is 
         # sent to a separated topic, and the preix can be set through the following 
         # property
-        demuxTopicPrefix: "ortc_demo_1_"
+        demuxTopicPrefix: "ortc_demo_2_"
 
         # Kafka Producer Configurations. see: https://kafka.apache.org/documentation/#producerconfigs
         properties:
-          bootstrap.servers: "docker_kafka:29092"
+          bootstrap.servers: "docker_demo_2_kafka:29092"
 
 
