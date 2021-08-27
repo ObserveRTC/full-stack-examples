@@ -406,7 +406,7 @@
     },
     "node-red-contrib-observertc": {
         "name": "node-red-contrib-observertc",
-        "version": "0.0.4",
+        "version": "0.0.6",
         "local": true,
         "user": true,
         "nodes": {
@@ -420,6 +420,68 @@
                 "user": false,
                 "module": "node-red-contrib-observertc",
                 "file": "/data/node_modules/node-red-contrib-observertc/report-demuxer.js"
+            }
+        }
+    },
+    "node-red-contrib-kafka-client": {
+        "name": "node-red-contrib-kafka-client",
+        "version": "0.0.10",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "kafka-consumer": {
+                "name": "kafka-consumer",
+                "types": [
+                    "kafka-consumer"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-kafka-client",
+                "file": "/data/node_modules/node-red-contrib-kafka-client/js/kafka-consumer.js"
+            },
+            "kafka-producer": {
+                "name": "kafka-producer",
+                "types": [
+                    "kafka-producer"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-kafka-client",
+                "file": "/data/node_modules/node-red-contrib-kafka-client/js/kafka-producer.js"
+            },
+            "kafka-broker": {
+                "name": "kafka-broker",
+                "types": [
+                    "kafka-broker"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-kafka-client",
+                "file": "/data/node_modules/node-red-contrib-kafka-client/js/kafka-broker.js"
+            }
+        }
+    },
+    "node-red-contrib-bigquery": {
+        "name": "node-red-contrib-bigquery",
+        "version": "0.2.1",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "bigquery": {
+                "name": "bigquery",
+                "types": [
+                    "bigquery query",
+                    "bigquery insert",
+                    "bigquery-config"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-contrib-bigquery",
+                "file": "/data/node_modules/node-red-contrib-bigquery/bigquery/bigquery.js"
             }
         }
     }

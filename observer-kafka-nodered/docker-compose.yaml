@@ -53,7 +53,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: ignored
 
   nodered:
-    image: nodered/node-red
+    # image: observertc/node-red-image:latest
+    image: nodered/node-red:latest
     container_name: docker_nodered
     ports:
       - 1880:1880
