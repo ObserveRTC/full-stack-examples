@@ -1,5 +1,5 @@
 
-Observer + Kafka
+Observer + Kafka + Node-RED
 ===
 
 Setup an observer, which sends the generated reports to kafka.
