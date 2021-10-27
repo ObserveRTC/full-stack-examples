@@ -3,7 +3,7 @@ services:
   observer:
     restart: always
     container_name: docker_observertc_observer
-    image: observertc/observer:1.0.0-alpha
+    image: observertc/observer:1.0.0-beta
     links:
       - kafka
     ports:
