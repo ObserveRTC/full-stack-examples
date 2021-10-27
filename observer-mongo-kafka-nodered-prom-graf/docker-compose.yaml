@@ -2,7 +2,7 @@ version: '3.3'
 services:
   observer:
     restart: always
-    container_name: docker_demo_3_observer
+    container_name: docker_demo_5_observer
     image: observertc/observer:1.0.0-beta
     links:
       - kafka
@@ -15,14 +15,39 @@ services:
       - kafka
     volumes:
       - ./observer:/config
+
+  mongodb:
+    image: mongo:4.2
+    container_name: docker_demo_5_mongo
+    hostname: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+  
+  mongo-express:
+    image: mongo-express
+    container_name: docker_demo_5_mongo_express
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_SERVER: docker_demo_5_mongo
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    depends_on:
+      - mongodb
+
   zookeeper:
-    container_name: docker_demo_3_zookeeper
+    container_name: docker_demo_5_zookeeper
     image: confluentinc/cp-zookeeper:5.5.1
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
   kafka:
-    container_name: docker_demo_3_kafka
+    container_name: docker_demo_5_kafka
     image: confluentinc/cp-kafka:5.5.1
     depends_on:
       - zookeeper
@@ -30,8 +55,8 @@ services:
       - 9092:9092
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: docker_demo_3_zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://docker_demo_3_kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ZOOKEEPER_CONNECT: docker_demo_5_zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://docker_demo_5_kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -40,11 +65,11 @@ services:
   kafka-setup:
     image: confluentinc/cp-kafka:5.5.1
     hostname: kafka-setup
-    container_name: docker_demo_3_kafka_setup
+    container_name: docker_demo_5_kafka_setup
     depends_on:
       - kafka
-    command: "bash -c ' cub kafka-ready -b docker_demo_3_kafka:29092 1 20 &&
-                        kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic ortc_demo_3_reports && \
+    command: "bash -c ' cub kafka-ready -b docker_demo_5_kafka:29092 1 20 &&
+                        kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic ortc_demo_5_reports && \
                         sleep 30'"
     environment:
       # The following settings are listed here only to satisfy the image's requirements.
@@ -55,7 +80,7 @@ services:
   nodered:
     image: observertc/node-red:latest
     # image: nodered/node-red:latest
-    container_name: docker_demo_3_nodered
+    container_name: docker_demo_5_nodered
     # environment: 
       # Set this up if you want your node-red to be protected.
       # to login: amdin/NODE_RED_PASSWORD
@@ -68,7 +93,7 @@ services:
 
 
   prometheus:
-    container_name: docker_demo_3_prom
+    container_name: docker_demo_5_prom
     image: prom/prometheus
     restart: always
     volumes:
