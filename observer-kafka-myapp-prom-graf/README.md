@@ -1,8 +1,9 @@
 
-Observer + Kafka
+Observer + Kafka + Custom NodeJS App + Prometheus + Grafana
 ===
 
-Setup an observer, which sends the generated reports to kafka.
+Setup an observer, which sends the generated reports to kafka. From kafka a custom NodeJS app reads the data calculate metrics and expose them to `/metrics` local endpoint.
+Prometheus scrapes `/metrics` target and updates its internal database. Finally Grafana reads Prometheus database and visualize metrics
 
 ### Usage
 

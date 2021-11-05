@@ -14,4 +14,5 @@ Go to http://localhost:8081 mongo express, enter with the username and password 
 
 ### Configurations
 
-Observer configuration files (`observer-config.yaml`) setup a sink to mongo.
+Observer configuration files (`observer-config/config.yaml`) setup a sink to the mongo.
+

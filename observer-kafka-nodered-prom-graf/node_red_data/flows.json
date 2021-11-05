@@ -85,7 +85,7 @@
         "broker": "21b32b5901f5cfa9",
         "outOfRangeOffset": "latest",
         "fromOffset": "earliest",
-        "topic": "ortc_demo_3_reports",
+        "topic": "observertc-reports",
         "groupid": "",
         "x": 140,
         "y": 220,

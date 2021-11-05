@@ -5,12 +5,12 @@ services:
       file: ../common-services.yaml
       service: observer
     environment:
-      - MICRONAUT_CONFIG_FILES=/observer-config/config.yaml
+      - MICRONAUT_CONFIG_FILES=/observer-config.yaml
     restart: always
     depends_on:
       - kafka
     volumes:
-      - ./observer-config:/observer-config
+      - ./observer-config/config.yaml:/observer-config.yaml
   zookeeper:
     extends:
       file: ../common-services.yaml
@@ -30,13 +30,12 @@ services:
     depends_on: 
       - kafka
 
-  nodered:
-    extends:
-      file: ../common-services.yaml
-      service: nodered
-    volumes:
-      - ./node_red_data:/data
-
+  # myapp:
+  #   build: # "context" and "dockerfile" fields have to be under "build"
+  #     context: .
+  #     dockerfile: ./myapp/Dockerfile
+  
+  
   prometheus:
     extends:
       file: ../common-services.yaml

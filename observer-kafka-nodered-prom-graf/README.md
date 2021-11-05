@@ -27,7 +27,7 @@ through an environment variable `INITIAL_WAITING_TIME_IN_S` you find it in the `
 
 #### Observer
 
-Observer configuration files (`observer/observer-config.yaml`) setup a sink to the kafka.
+Observer configuration files (`observer-config/config.yaml`) setup a sink to the kafka.
 
 #### Grafana
 

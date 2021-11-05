@@ -1,42 +1,25 @@
 version: '3.3'
 services:
   observer:
-    restart: always
-    container_name: docker_observertc_observer
-    image: observertc/observer:1.0.0-beta
-    links:
-      - mongodb
-    ports:
-      - 7080:7080
+    extends:
+      file: ../common-services.yaml
+      service: observer
     environment:
-      - INITIAL_WAITING_TIME_IN_S=30
-      # - KAFKA_HOSTS=docker_kafka:29092
       - MICRONAUT_CONFIG_FILES=/observer-config.yaml
-    depends_on:
-      - mongodb
+    restart: always
     volumes:
-      - ./observer-config.yaml:/observer-config.yaml
+      - ./observer-config/config.yaml:/observer-config.yaml
   
   mongodb:
-    image: mongo:4.2
-    container_name: docker_mongo
-    hostname: mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - "27017:27017"
+    extends:
+      file: ../common-services.yaml
+      service: mongodb
+    restart: always
   
   mongo-express:
-    image: mongo-express
-    container_name: docker_mongo_express
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_SERVER: docker_mongo
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: password
+    extends:
+      file: ../common-services.yaml
+      service: mongo-express
+    restart: always
     depends_on:
       - mongodb

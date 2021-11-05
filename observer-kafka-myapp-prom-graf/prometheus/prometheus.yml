@@ -39,7 +39,7 @@ scrape_configs:
     scrape_interval: 5s
 
     static_configs:
-         - targets: ['localhost:9090', 'docker_demo_3_nodered:1880']
+         - targets: ['localhost:9090', 'myapp:7500']
 
 
   - job_name: 'cadvisor'
