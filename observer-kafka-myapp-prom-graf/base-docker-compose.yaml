@@ -1,0 +1,87 @@
+version: '3.3'
+services:
+  observer:
+    extends:
+      file: ../common-services.yaml
+      service: observer
+    environment:
+      - MICRONAUT_CONFIG_FILES=/observer-config.yaml
+    restart: always
+    depends_on:
+      - kafka
+    volumes:
+      - ./observer-config/config.yaml:/observer-config.yaml
+  zookeeper:
+    extends:
+      file: ../common-services.yaml
+      service: zookeeper
+    restart: always
+  kafka:
+    extends:
+      file: ../common-services.yaml
+      service: kafka
+    depends_on: 
+      - zookeeper
+    restart: always
+  kafka-setup:
+    extends:
+      file: ../common-services.yaml
+      service: kafka-setup
+    depends_on: 
+      - kafka
+
+  # myapp:
+  #   build: # "context" and "dockerfile" fields have to be under "build"
+  #     context: .
+  #     dockerfile: ./myapp/Dockerfile
+  
+  
+  prometheus:
+    extends:
+      file: ../common-services.yaml
+      service: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus/
+      - prometheus_data:/prometheus
+    links:
+      - cadvisor:cadvisor
+      - alertmanager:alertmanager
+    depends_on:
+      - cadvisor
+    
+  node-exporter:
+    extends:
+      file: ../common-services.yaml
+      service: node-exporter
+    restart: always
+
+  alertmanager:
+    extends:
+      file: ../common-services.yaml
+      service: alertmanager
+    restart: always
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+
+  cadvisor:
+    extends:
+      file: ../common-services.yaml
+      service: cadvisor
+    restart: always
+
+  grafana:
+    extends:
+      file: ../common-services.yaml
+      service: grafana
+    restart: always
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    depends_on:
+      - prometheus
+  
+volumes:
+  prometheus_data: {}
+  grafana_data: {}

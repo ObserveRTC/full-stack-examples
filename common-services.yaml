@@ -1,6 +1,4 @@
 services:
-  
-  
   observer:
     restart: always
     image: observertc/observer:1.0.0-beta

@@ -11,6 +11,8 @@ The image is available directly from [Docker Hub](hhttps://hub.docker.com/reposi
 
 - install docker-compose [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)
 
+*NOTE* if you want to regenerate the docker-compose files by yourself, then: `pip install -r requirements.txt`, `python generate-docker-compose-files.py`
+
 ## Quick Start
 
 ```shell
