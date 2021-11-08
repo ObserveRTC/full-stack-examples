@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+  observer:
+    extends:
+      file: ../common-services.yaml
+      service: observer
+    environment:
+      - MICRONAUT_CONFIG_FILES=/observer-config.yaml
+    restart: always
+    volumes:
+      - ./observer-config/config.yaml:/observer-config.yaml
+  
+  mongodb:
+    extends:
+      file: ../common-services.yaml
+      service: mongodb
+    restart: always
+  
+  mongo-express:
+    extends:
+      file: ../common-services.yaml
+      service: mongo-express
+    restart: always
+    depends_on:
+      - mongodb

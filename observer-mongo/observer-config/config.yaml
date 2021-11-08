@@ -1,0 +1,8 @@
+observer:
+  sinks:
+    MyMongoSink:
+      type: MongoSink
+      config:
+        uri: "mongodb://root:password@mongodb:27017"
+        database: "observertc-reports"
+

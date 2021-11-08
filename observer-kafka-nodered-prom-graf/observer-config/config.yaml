@@ -1,0 +1,18 @@
+observer:
+  sinks:
+    MyKafkaSink:
+      type: KafkaSink
+      config:
+        muxReports: true
+        muxTopic: "observertc-reports"
+
+        # If muxReports property is false, then each type of report is 
+        # sent to a separated topic, and the preix can be set through the following 
+        # property
+        demuxTopicPrefix: "observertc-"
+
+        # Kafka Producer Configurations. see: https://kafka.apache.org/documentation/#producerconfigs
+        properties:
+          bootstrap.servers: "kafka:29092"
+
+
