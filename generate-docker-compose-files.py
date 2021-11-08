@@ -21,7 +21,6 @@ for entry in os.scandir(directory):
             to_remove.append(key)
         if "extends" in value.keys():
             del value["extends"]
-            print("deleted")
     for not_included_service in to_remove:
         del docker_compose_conf["services"][not_included_service]
 

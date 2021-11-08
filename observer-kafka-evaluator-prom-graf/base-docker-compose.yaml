@@ -11,11 +11,21 @@ services:
       - kafka
     volumes:
       - ./observer-config/config.yaml:/observer-config.yaml
+
+  evaluator:
+    extends:
+      file: ../common-services.yaml
+    restart: always
+    depends_on:
+      - kafka
+      - observer
+
   zookeeper:
     extends:
       file: ../common-services.yaml
       service: zookeeper
     restart: always
+
   kafka:
     extends:
       file: ../common-services.yaml
@@ -23,6 +33,7 @@ services:
     depends_on: 
       - zookeeper
     restart: always
+
   kafka-setup:
     extends:
       file: ../common-services.yaml

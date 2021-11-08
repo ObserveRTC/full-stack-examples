@@ -7,7 +7,17 @@ services:
     environment:
       - INITIAL_WAITING_TIME_IN_S=30
   
-  
+  evaluator:
+    restart: always
+    image: observertc/evaluator-js:latest
+    ports:
+      - 5080:5080
+    environment:
+      - SERVER_PORT=5080
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_MUX_REPORT_TOPIC_NAME=observertc-reports
+      - INITIAL_WAITING_TIME_IN_S=30
+
   zookeeper:
     # container_name: observertc_examples_zookeeper
     image: confluentinc/cp-zookeeper:5.5.1
@@ -36,6 +46,7 @@ services:
     # depends_on:
     #   - kafka
     command: "bash -c ' sleep 20 && cub kafka-ready -b kafka:29092 1 20 &&
+                        kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-reports && \
                         kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-observer-event && \
                         kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-call-event && \
                         kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-call-meta-data && \

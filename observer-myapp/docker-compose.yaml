@@ -11,6 +11,19 @@ services:
     - kafka
     volumes:
     - ./observer-config/config.yaml:/observer-config.yaml
+  evaluator:
+    restart: always
+    image: observertc/evaluator-js:latest
+    ports:
+    - 5080:5080
+    environment:
+    - SERVER_PORT=5080
+    - KAFKA_BROKERS=kafka:29092
+    - KAFKA_MUX_REPORT_TOPIC_NAME=observertc-reports
+    - INITIAL_WAITING_TIME_IN_S=30
+    depends_on:
+    - kafka
+    - observer
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.1
     environment:
@@ -69,10 +82,73 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: ignored
     depends_on:
     - kafka
-  nodered:
-    image: observertc/node-red:latest
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    command:
+    - --config.file=/etc/prometheus/prometheus.yml
+    - --storage.tsdb.path=/prometheus
+    - --web.console.libraries=/usr/share/prometheus/console_libraries
+    - --web.console.templates=/usr/share/prometheus/consoles
     ports:
-    - 1880:1880
+    - 9090:9090
     volumes:
-    - ./node_red_data:/data
+    - ./prometheus:/etc/prometheus/
+    - prometheus_data:/prometheus
+    links:
+    - cadvisor:cadvisor
+    - alertmanager:alertmanager
+    depends_on:
+    - cadvisor
+  node-exporter:
+    image: prom/node-exporter
+    volumes:
+    - /proc:/host/proc:ro
+    - /sys:/host/sys:ro
+    - /:/rootfs:ro
+    command:
+    - --path.procfs=/host/proc
+    - --path.sysfs=/host/sys
+    - --collector.filesystem.ignored-mount-points
+    - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
+    ports:
+    - 9100:9100
+    restart: always
+    deploy:
+      mode: global
+  alertmanager:
+    image: prom/alertmanager
+    restart: always
+    ports:
+    - 9093:9093
+    volumes:
+    - ./alertmanager/:/etc/alertmanager/
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+    - 8080:8080
+    restart: always
+    deploy:
+      mode: global
+  grafana:
+    image: grafana/grafana
+    user: '472'
+    restart: always
+    ports:
+    - 3500:3000
+    volumes:
+    - grafana_data:/var/lib/grafana
+    - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+    - ./grafana/config.monitoring
+    depends_on:
+    - prometheus
 version: '3.3'
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
