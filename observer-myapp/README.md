@@ -2,7 +2,7 @@
 Observer + MyApp
 ===
 
-Setup an observer sends reports to a [http://socket.io](socket.io) sink.
+Setup an observer sends reports to a [socket.io](http://socket.io) sink.
 a custom NodeJS service, [myApp](myapp/) receives reports from the observer 
 and calculate the number of calls started, ended and durations to a prometheus 
 `/metrics` endpoint at myApp.
