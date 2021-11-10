@@ -1,0 +1,6 @@
+observer:
+  sinks:
+    MySocketIOSink:
+      type: SocketIOSink
+      config:
+        uri: http://myapp:5080
