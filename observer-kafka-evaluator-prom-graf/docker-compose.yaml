@@ -50,32 +50,32 @@ services:
     command: bash -c ' sleep 20 && cub kafka-ready -b kafka:29092 1 20 && kafka-topics
       --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor
       1 --topic observertc-reports && kafka-topics --create --if-not-exists --zookeeper
-      zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-observer-event
+      zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-OBSERVER_EVENT
       && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
-      12 --replication-factor 1 --topic observertc-call-event && kafka-topics --create
+      12 --replication-factor 1 --topic observertc-CALL_EVENT && kafka-topics --create
       --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor
-      1 --topic observertc-call-meta-data && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-client-extension-data
+      1 --topic observertc-CALL_META_DATA && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-CLIENT_EXTENSION_DATA
       && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
-      12 --replication-factor 1 --topic observertc-peer-connection-transport && kafka-topics
+      12 --replication-factor 1 --topic observertc-PEER_CONNECTION_TRANSPORT && kafka-topics
       --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor
-      1 --topic observertc-peer-connection-data-channel && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-inbound-audio-track
+      1 --topic observertc-PEER_CONNECTION_DATA_CHANNEL && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-INBOUND_AUDIO_TRACK
       && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
-      12 --replication-factor 1 --topic observertc-inbound-video-track && kafka-topics
+      12 --replication-factor 1 --topic observertc-INBOUND_VIDEO_TRACK && kafka-topics
       --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor
-      1 --topic observertc-outbound-audio-track && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-outbound-video-track
+      1 --topic observertc-OUTBOUND_AUDIO_TRACK && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-OUTBOUND_VIDEO_TRACK
       && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
-      12 --replication-factor 1 --topic observertc-sfu-event && kafka-topics --create
+      12 --replication-factor 1 --topic observertc-SFU_EVENT && kafka-topics --create
       --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor
-      1 --topic observertc-sfu-meta-data && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-sfu-transport
+      1 --topic observertc-SFU_META_DATA && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-SFU_TRANSPORT
       && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
-      12 --replication-factor 1 --topic observertc-sfu-rtp-source-stream && kafka-topics
+      12 --replication-factor 1 --topic observertc-SFU_INBOUND_RTP_PAD && kafka-topics
       --create --if-not-exists --zookeeper zookeeper:2181 --partitions 12 --replication-factor
-      1 --topic observertc-sfu-rtp-sink-stream && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-sfu-rtp-sctp-stream
+      1 --topic observertc-SFU_OUTBOUND_RTP_PAD && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 12 --replication-factor 1 --topic observertc-SFU_SCTP_STREAM
       && sleep 30'
     environment:
       KAFKA_BROKER_ID: ignored
