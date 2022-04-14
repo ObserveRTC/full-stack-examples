@@ -1,0 +1,44 @@
+version: '3.3'
+services:
+  sfu:
+    build: 
+      context: ./sfu
+      dockerfile: Dockerfile
+    # container_name: docker_observertc_mediasoup_sfu
+    network_mode: "bridge"
+    ports:
+      - "15000-15900:15000-15900/udp"
+      - "5959:5959"
+    environment:
+      - HOSTNAME=localhost
+      - RTCMIN_PORT=15000
+      - RTCMAX_PORT=15900
+      - WEBPAGE_PORT=5959
+      - SERVER_IP=0.0.0.0
+      - ANNOUNCED_IP=192.168.1.106
+      - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
+      - OBSERVER_EXTERNAL_ADDRESS=localhost:7080
+  
+  observer:
+    extends:
+      file: ../common-services.yaml
+      service: observer
+    environment:
+      - MICRONAUT_CONFIG_FILES=/observer-config.yaml
+    restart: always
+    volumes:
+      - ./observer-config/config.yaml:/observer-config.yaml
+  
+  mongodb:
+    extends:
+      file: ../common-services.yaml
+      service: mongodb
+    restart: always
+  
+  mongo-express:
+    extends:
+      file: ../common-services.yaml
+      service: mongo-express
+    restart: always
+    depends_on:
+      - mongodb

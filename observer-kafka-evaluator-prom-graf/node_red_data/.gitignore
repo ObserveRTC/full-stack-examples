@@ -1,7 +1,0 @@
-*
-
-# But not these files...
-!.gitignore
-!settings.js
-!flows.json
-# !package.json

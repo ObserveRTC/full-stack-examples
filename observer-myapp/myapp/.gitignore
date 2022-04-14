@@ -1,6 +1,0 @@
-.idea
-*.json
-.gradle
-gradle*
-keys/
-node_modules
