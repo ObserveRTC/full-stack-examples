@@ -11,7 +11,6 @@ This repository collect examples to use ObserveRTC in various scenarios or conne
 
 ## Examples
 
-### Mediasoup
-
-[This](mediasoup/) example shows how to put together Mediasoup SFU and a simple WebRTC client app to use ObserveRTC.
+ * [Observer-mediasoup](observer-mediasoup/) example shows how to put together Mediasoup SFU and a simple WebRTC client app to use ObserveRTC.
+  * [Observer-kafka](observer-kafka/) example shows how to connect observer to kafka
 
