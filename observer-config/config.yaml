@@ -1,0 +1,19 @@
+observer:
+  buffers:
+    samplesCollector:
+      maxTimeInMs: 1000
+
+    debouncers:
+      maxTimeInMs: 1000
+
+    reportsCollector:
+      maxTimeInMs: 1000
+
+  sinks:
+    MyMongoSink:
+      type: MongoSink
+      config:
+        uri: "mongodb://root:password@mongodb:27017"
+        database: "observertc-reports"
+        printSummary: true
+
