@@ -2,7 +2,7 @@ import { MediasoupComlink } from "./MediasoupComlink";
 import { v4 as uuidv4 } from "uuid";
 import * as appEvents from "../AppEvents";
 import * as mediasoup from "mediasoup-client";
-import * as monitor from "../MyMonitor";
+import { monitor } from "../MyMonitor";
 
 let comlink: MediasoupComlink | undefined;
 export type MediasoupConfig = {

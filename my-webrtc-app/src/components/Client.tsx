@@ -30,7 +30,7 @@ export class Client extends React.Component<ClientConfig, ClientState> {
     componentDidMount() {
         this.videoRef.current.srcObject = this.props.stream;
         this.videoRef.current.play().catch(err => {
-            MyMonitor.addUserMediaError(err);
+            MyMonitor.monitor.addUserMediaError(err);
         });
         this.metricsUpdatedListener = metrics => {
             const stats: string[] = [];

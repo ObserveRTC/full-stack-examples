@@ -248,12 +248,5 @@ export const config = ConfigProcessor.from({
         defaultValue: "localhost:7080",
         env: 'OBSERVER_INTERNAL_ADDRESS',
         arg: 'observerInternalAddress',
-    },
-    observerExternalAddress: {
-        doc: 'The observer external address inside the network where the observer relies',
-        format: "string",
-        defaultValue: "localhost:7080",
-        env: 'OBSERVER_EXTERNAL_ADDRESS',
-        arg: 'observerExternalAddress',
     }
 })

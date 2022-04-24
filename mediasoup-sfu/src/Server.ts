@@ -1,7 +1,5 @@
 import * as mediasoup from "mediasoup";
 import * as http from 'http';
-import * as fs from "fs";
-import * as path from "path";
 import { Call } from "./Call";
 import { WebSocketServer, WebSocket } from 'ws';
 import { Comlink } from "./Comlink";
@@ -9,7 +7,6 @@ import { Client, ConsumerInfo, ProducerInfo } from "./Client";
 import { v4 as uuidv4 } from "uuid";
 import { CapabilitiesRequest, CreateProducerRequest, PauseProducerRequest, ResumeProducerRequest, RtpCapabilitiesNotification, TransportConnectedNotification, TransportInfo, TransportInfoRequest } from "./MessageTypes";
 import { TransportRole, mediaCodecs } from "./constants";
-import { makeRoomHtml } from "./RoomHtml";
 import * as Monitor from "./Monitor";
 
 const metrics: Monitor.MonitoredMetrics = {};
@@ -32,7 +29,6 @@ interface Builder {
     setAnnouncedIp(value: string): Builder;
     setPort(value: number): Builder;
     setObserverInternalAddress(value: string): Builder;
-    setObserverExternalAddress(value: string): Builder;
     build(): Promise<Server>;
 };
 
@@ -60,10 +56,6 @@ export class Server {
             },
             setObserverInternalAddress: (value: string) => {
                 server._observerInternalAddress = value;
-                return result;
-            },
-            setObserverExternalAddress: (value: string) => {
-                server._observerExternalAddress = value;
                 return result;
             },
             setRtcMinPort: (value: number) => {
@@ -94,7 +86,6 @@ export class Server {
         return result;
     }
     private _observerInternalAddress?: string;
-    private _observerExternalAddress?: string;
     private _serverIp?: string;
     private _announcedIp?: string;
     private _hostname?: string;
@@ -140,7 +131,7 @@ export class Server {
             format: "json",
             rest: {
                 closeIfFailed: true,
-                maxRetries: 3,
+                maxRetries: 15, // we need to give some try if the docker container spins up later
                 urls: [`http://${this._observerInternalAddress}/rest/samples/myService/mediasoup-sfu`],
             }
         })
@@ -232,26 +223,12 @@ export class Server {
                 insecureHTTPParser: false,
             }
         );
-        const bundledIndexContent = fs.readFileSync(path.resolve(__dirname, `./bundled-index.js`) );;
         result.on('request', (request, response) => {
             const parts = request!.url!.split("/");
             const resource = parts.length < 2 ? undefined : parts[1];
             if (resource === "metrics") {
                 response.writeHead(200, {'Content-Type': 'application/json'});
                 response.end(JSON.stringify(metrics));
-            } else if (resource === "rooms") {
-                const roomId = parts[2];
-                const html = makeRoomHtml({
-                    roomId,
-                    observerAddress: this._observerExternalAddress ?? "notExistingUrl",
-                    server: this._hostname!,
-                    port: this._port,
-                });
-                response.writeHead(200, {'Content-Type': 'text/html'});
-                response.end(html);
-            } else if (resource === "bundledIndexJs") {
-                response.writeHead(200, {'Content-Type': 'text/plain'});
-                response.end(bundledIndexContent);
             } else {
                 response.writeHead(200, {'Content-Type': 'application/json'});
                 response.end(JSON.stringify({

@@ -64,6 +64,7 @@ export class Canvas extends React.Component<CanvasConfig, State> {
                 userId,
                 stream,
             };
+            stream.addTrack(track);
             remoteClients.set(remoteClientId, remoteClient);
             this.setState({
                 ...this.state,

@@ -34,14 +34,12 @@ async function main(): Promise<void> {
     const rtcMaxPort = config.getAsNumber("rtcMaxPort");
     const announcedIp = config.get("announcedIp");
     const observerInternalAddress = config.get("observerInternalAddress");
-    const observerExternalAddress = config.get("observerExternalAddress");
     const serverIp = config.get("serverIp") ?? await lookup(hostname);
     logger.info("Server IP", serverIp);
     const server = await Server.builder()
         .setPort(webpagePort)
         .setHostname(hostname)
         .setObserverInternalAddress(observerInternalAddress)
-        .setObserverExternalAddress(observerExternalAddress)
         .setServerIp(serverIp)
         .setAnnouncedIp(announcedIp)
         .setRtcMinPort(rtcMinPort)

@@ -10,31 +10,22 @@ const config: ClientMonitor.ClientMonitorConfig = {
     sampler: {
         roomId: appStore.getRoomId(),
         clientId: appStore.getClientId(),
+    },
+    sender: {
+        format: "json",
+        websocket: {
+            urls: [
+                "ws://localhost:7080/samples/myService/my-webrtc-app"
+            ],
+            maxRetries: 3,
+        }
     }
 }
 
-const monitor = ClientMonitor.create(config);
-
-export function addTrackRelation(trackRelation: TrackRelation) {
-    monitor.addTrackRelation(trackRelation);
-}
-
-export function removeTrackRelation(trackId: string) {
-    monitor.removeTrackRelation(trackId);
-}
-
-export function addStatsCollector(collector: PcStatsCollector) {
-    monitor.addStatsCollector(collector);
-}
-
-export function addUserMediaError(err: any) {
-    const message = typeof err === 'string' ? err : JSON.stringify(err);
-    monitor.addUserMediaError(message);
-}
+export const monitor = ClientMonitor.create(config);
 
 
 // define the metrics you want to expose
-
 const METRICS_UPDATED = "metricsUpdated";
 const emitter = new EventEmitter();
 type TrackLayerMetrics = {

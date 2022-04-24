@@ -1,11 +1,18 @@
-FROM ubuntu:20.04
-
+FROM node:alpine
 USER root
 
 ENV TZ=Europe/Helsinki
 
+WORKDIR /app
+
+COPY package.json ./
+
+COPY ./ ./
+
 RUN npm install
+
 RUN npm install typescript -g
-RUN tsc
-# ENV DEBUG="mediasoup*"
-CMD [ "node", "dist/main.js" ]
+RUN npm install webpack webpack-cli --save-dev
+RUN npm run prod-compile
+
+CMD ["npm", "run", "start"]

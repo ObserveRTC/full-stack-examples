@@ -1,7 +1,7 @@
 My-WebRTC-App
 ---
 
-An SFU controller using mediasoup written in typescript.
+A simple react app written in typescript for WebRTC.
 
 ## ObserveRTC integration
 
@@ -9,9 +9,9 @@ The [@observertc/client-monitor-js](https://github.com/ObserveRTC/client-monitor
 
 You can find the integration code snippets in the following components:
 
- * [Monitor](src/Monitor.ts): config a monitor and analyse the stats.
- * [Server](src/Server.ts): check how monitor is connected to the observer
- * [Client](src/Client.ts): add transport to the monitor
+ * [MyMonitor](src/MyMonitor.ts): config a monitor and analyse the stats.
+ * [index](src/index.tsx): add media inputs, and media constraints to the monitor.
+ * [MediasoupClient](src/mediasoup/MediasoupClient.ts): mediasoup sfu integration.
 
 You can also just search for `-- ObserveRTC integration --` comment in the whole project.
 
