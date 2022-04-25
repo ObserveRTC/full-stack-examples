@@ -1,4 +1,4 @@
-My-WebRTC-App
+Sfu service using mediasoup
 ---
 
 An SFU controller using mediasoup written in typescript.
