@@ -19,15 +19,21 @@ You can also just search for `-- ObserveRTC integration --` comment in the whole
 
 1. Install dependencies
 
+```bash
     npm i
+```
 
 2. Compile the react app with webpack: 
-    
+
+```bash    
     npm run compile
+```
 
 3. Run the web server
 
+```bash
     node server.js
+```
 
 4. Go to http://localhost:9000 in your browser.
 

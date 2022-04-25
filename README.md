@@ -1,19 +1,20 @@
-Full stack Examples for using ObserveRTC
+Full stack examples for integrating ObserveRTC
 ============
 
 This repository contains full stack examples to use and integrate ObserveRTC.
 
 ## Quick Start
 
-1. In terminal type:
+1. In terminal, type:
 
-    SFU_ANNOUNCED_IP={YOUR_LOCAL_IP_ADDRESS} docker-compose up
+```bash
+    SFU_ANNOUNCED_IP={MY_LOCAL_IP_ADDRESS} docker-compose up
+```
 
+**MY_LOCAL_IP_ADDRESS** is the IP address of your local network interface connect to the internet. 
+You can obtain it by typing `ifconfig` in macOs or Linux, or `ipconfig` in Windows.
 
-**YOUR_LOCAL_IP_ADDRESS** is the IP address of your local network interface connect to the internet. 
-You can obtain it by typing `ifconfig` in macOs or Linux, and `ipconfig` in Windows.
-
-2. In your browser go to `http://localhost:9000` (open it in two, or three tabs).
+2. In your browser go to http://localhost:9000 (open it in two, or three tabs).
 
 To see the collected reports, check the mongodb at: http://localhost:8081/ 
 
