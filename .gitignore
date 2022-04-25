@@ -5,3 +5,5 @@ gradle*
 keys/
 node_modules/
 purgatory/
+
+my-*.yaml

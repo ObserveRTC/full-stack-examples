@@ -46,14 +46,14 @@ services:
     - SERVER_IP=0.0.0.0
     - ANNOUNCED_IP=${SFU_ANNOUNCED_IP}
     - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
-    # depends_on:
-    # - observer
+    depends_on:
+    - observer
   webrtc-app:
     build:
       context: ./my-webrtc-app
       dockerfile: Dockerfile
     ports:
     - 9000:9000
-    # depends_on:
-    # - observer
+    depends_on:
+    - observer
 version: '3.3'
