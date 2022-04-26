@@ -17,7 +17,7 @@ You can obtain it by typing `ifconfig` in macOs or Linux, or `ipconfig` in Windo
 
 When containers are running, in your browser go to http://localhost:9000 (open it in two, or three tabs).
 
-To see the collected reports, check the mongodb at: http://localhost:8081/ 
+To see the collected [reports](https://observertc.org/docs/overview/schemas/#reports), check the mongodb at: http://localhost:8081/.
 
 To see some SFU metrics calculated by the sfu-montior go to http://localhost:5959/metrics
 
