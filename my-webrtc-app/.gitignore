@@ -1,5 +1,5 @@
 .idea
-*.json
+package-lock.json
 .gradle
 gradle*
 keys/
