@@ -2,3 +2,5 @@ node_modules/
 dist/
 keys/*
 package-lock.json
+!package.json
+!tsconfig.json
