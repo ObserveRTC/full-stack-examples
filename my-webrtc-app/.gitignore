@@ -1,5 +1,7 @@
 .idea
 package-lock.json
+!package.json
+!tsconfig.json
 .gradle
 gradle*
 keys/
