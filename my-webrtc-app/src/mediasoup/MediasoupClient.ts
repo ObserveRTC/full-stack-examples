@@ -110,6 +110,30 @@ export async function create(config: MediasoupConfig) {
         });
         console.log(`Producer ${producerId} is resumed`);
     });
+
+    await new Promise<void>(async resolve => {
+        const isSfuRun = async () => {
+            const { state } = await comlink.requestSfuState();
+            console.log("SfuState is ", state);
+            return state === "run";
+        }
+        if (await isSfuRun()) {
+            resolve();
+            return;
+        }
+        const wait = (tried = 0) => setTimeout(async () => {
+            if (10 < tried) {
+                throw new Error(`Sfu State is not run.`);
+            }
+            if (await isSfuRun()) {
+                resolve();
+                return;
+            }
+            wait(tried + 1);
+        }, 2000);
+        wait();
+    })
+
     const device = new mediasoup.Device();
     const { rtpCapabilities: routerRtpCapabilities } = await comlink.requestCapabilities();
     console.log(`Got routerCapabilities:`, routerRtpCapabilities);

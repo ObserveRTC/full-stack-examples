@@ -10,6 +10,9 @@ export const MessageTypes = {
     ConsumerCreated: "ConsumerCreated",
     ConsumerRemoved: "ConsumerRemoved",
     RtpCapabilities: "RtpCapabilities",
+
+    SfuStateRequest: "SfuStateRequest",
+    SfuStateResponse: "SfuStateResponse",
 }
 
 interface Notification {
@@ -55,6 +58,10 @@ export interface PauseProducerRequest extends Request {
     producerId: string;
 }
 
+export interface SfuStateRequest extends Request {
+
+}
+
 export interface CapabilitiesResponse extends Response {
     rtpCapabilities: mediasoup.types.RtpCapabilities;
 }
@@ -69,6 +76,10 @@ export interface PauseProducerResponse extends Response {
 
 export interface ResumeProducerResponse extends Response {
 
+}
+
+export interface SfuStateResponse extends Response {
+    state: string;
 }
 
 export interface TransportInfoRequest extends Request {

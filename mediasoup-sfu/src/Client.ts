@@ -1,6 +1,6 @@
-import mediasoup from "mediasoup";
+import * as mediasoup from "mediasoup";
 import { EventEmitter } from "ws";
-import { TransportInfo } from "./MessageTypes";
+import { TransportInfo } from "./ClientMessageTypes";
 import { MediasoupCollector } from "@observertc/sfu-monitor-js";
 
 const log4js = require('log4js');
@@ -17,6 +17,7 @@ const ON_PRODUCER_ADDED_EVENT_NAME = "producerAdded";
 const ON_PRODUCER_REMOVED_EVENT_NAME = "producerRemoved";
 const ON_CONSUMER_ADDED_EVENT_NAME = "consumerAdded";
 const ON_CONSUMER_REMOVED_EVENT_NAME = "consumerRemoved";
+const ON_RECEIVER_TRANSPORT_READY_EVENT_NAME = "receiverTransportReady";
 const ON_CLOSED_EVENT_NAME = "closed";
 
 export type ProducerInfo = {
@@ -28,7 +29,7 @@ export type ProducerInfo = {
 };
 
 type ProducerAddedEventListener = (producerInfo: ProducerInfo) => void;
-type ProducerRemovedEventListener = (producerId: number) => void;
+type ProducerRemovedEventListener = (producerId: string) => void;
 
 export type ConsumerInfo = {
     id: string,
@@ -50,6 +51,7 @@ export interface Builder {
     onProducerRemoved(listener: ProducerRemovedEventListener): Builder;
     onConsumerAdded(listener: ConsumerEventListener): Builder;
     onConsumerRemoved(listener: ConsumerRemovedEventListener): Builder;
+    onReceiverTransportReady(listener: () => void): Builder;
     onClosed(listener: () => void): Builder;
     build(): Promise<Client>;
 }
@@ -92,6 +94,10 @@ export class Client {
             },
             onClosed: (listener: () => void) => {
                 client._emitter.once(ON_CLOSED_EVENT_NAME, listener);
+                return result;
+            },
+            onReceiverTransportReady: (listener: () => void) => {
+                client._emitter.once(ON_RECEIVER_TRANSPORT_READY_EVENT_NAME, listener);
                 return result;
             },
             build: async () => {
@@ -194,7 +200,7 @@ export class Client {
 
     public async makeConsumerTransport(options: mediasoup.types.WebRtcTransportOptions): Promise<TransportInfo> {
         const transport: WebRtcTransport = await this._makeTransport(options);
-        
+
         // -- ObserveRTC integration --
         // add transport to the monitor
         if (this._collector) {
@@ -203,6 +209,7 @@ export class Client {
             });
         }
         this._consumerTransport = transport;
+        this._emitter.emit(ON_RECEIVER_TRANSPORT_READY_EVENT_NAME);
         return {
             id: transport.id,
             iceParameters: transport.iceParameters,

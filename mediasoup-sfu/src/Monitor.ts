@@ -43,6 +43,10 @@ export function connect(config: SenderConfig) {
     monitor.connect(config);
 }
 
+export function close() {
+    monitor.close();
+}
+
 const traces = new Map();
 let lastCheck = Date.now();
 monitor.events.onStatsCollected(() => {

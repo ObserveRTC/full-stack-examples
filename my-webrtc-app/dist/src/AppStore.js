@@ -1,16 +1,13 @@
-import { getRandomUserId, userIds } from "./UserIds";
+import { getRandomUserId } from "./UserIds";
 import { v4 as uuidv4 } from "uuid";
-
-export type ClientType = "mediasoup";
-let clientType: ClientType | undefined;
-let roomId: string | undefined;
-let sfuAddress: string | undefined;
-const clientId = uuidv4();
-const userId = getRandomUserId();
-
+var clientType;
+var roomId;
+var sfuAddress;
+var clientId = uuidv4();
+var userId = getRandomUserId();
 export function getRoomId() {
     if (!roomId) {
-        const candidate = document.querySelector("span#roomId");
+        var candidate = document.querySelector("span#roomId");
         if (candidate) {
             roomId = candidate.textContent;
         }
@@ -20,28 +17,25 @@ export function getRoomId() {
 export function getUserId() {
     return userId;
 }
-
 export function getClientId() {
     return clientId;
 }
-
 export function getClientType() {
     if (!clientType) {
-        const candidate = document.querySelector("span#clientType").textContent.toLocaleLowerCase();
+        var candidate = document.querySelector("span#clientType").textContent.toLocaleLowerCase();
         switch (candidate) {
             case "mediasoup":
                 clientType = "mediasoup";
                 break;
             default:
-                throw new Error(`Cannot recognize sfuType: ${candidate}`);
+                throw new Error("Cannot recognize sfuType: " + candidate);
         }
     }
     return clientType;
 }
-
 export function getSfuAddress() {
     if (!sfuAddress) {
-        const candidate = document.querySelector("span#sfuAddress");
+        var candidate = document.querySelector("span#sfuAddress");
         if (candidate) {
             sfuAddress = candidate.textContent;
         }

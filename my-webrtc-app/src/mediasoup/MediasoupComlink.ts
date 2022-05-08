@@ -1,6 +1,6 @@
 import * as EventEmitter from "events";
 import * as mediasoup from "mediasoup-client";
-import { CapabilitiesResponse, ConsumerClosedNotification, ConsumerCreatedNotification, CreateProducerResponse, MessageTypes, PauseProducerResponse, ResumeProducerResponse, TransportInfo, TransportInfoRequest } from "./MediasoupMessageTypes";
+import { CapabilitiesResponse, ConsumerClosedNotification, ConsumerCreatedNotification, CreateProducerResponse, MessageTypes, PauseProducerResponse, ResumeProducerResponse, SfuStateResponse, TransportInfo, TransportInfoRequest } from "./MediasoupMessageTypes";
 import { v4 as uuidv4 } from "uuid";
 
 const ON_CONSUMER_CREATED_EVENT_NAME = "ConsumerCreated";
@@ -90,6 +90,13 @@ export class MediasoupComlink {
             messageType: MessageTypes.CapabilitiesRequest,
             payload: {}
         });
+    }
+
+    requestSfuState(): Promise<SfuStateResponse> {
+        return this._sendRequestAndPromise<SfuStateResponse>({
+            messageType: MessageTypes.SfuStateRequest,
+            payload: {},
+        })
     }
 
     requestCreateProducer({ kind, rtpParameters, userId }: { kind: string, rtpParameters: any, userId: string }): Promise<CreateProducerResponse> {

@@ -27,7 +27,7 @@
     "@types/ws": "^8.2.2",
     "events": "^3.3.0",
     "log4js": "^6.4.5",
-    "mediasoup": "^3.9.10",
+    "mediasoup": "^3.9.6",
     "uuid": "^8.3.2",
     "ws": "^8.3.0",
     "yargs-parser": "^21.0.0"
