@@ -1,15 +1,16 @@
 import * as React from "react";
-import { ObjectFlags } from "typescript";
 import * as appEvents from "../AppEvents";
 import * as appStore from "../AppStore";
 import * as MyMonitor from "../MyMonitor";
 import { Client, ClientConfig } from "./Client";
+import { v4 as uuidv4 } from "uuid";
 
 export type CanvasConfig = {
 
 };
 
 type State = {
+    peerConnections: string[],
     localClient: ClientConfig,
     remoteClients: Map<string, ClientConfig>,
     statsCollectingTimeInMs?: number;
@@ -26,6 +27,7 @@ export class Canvas extends React.Component<CanvasConfig, State> {
 
     componentDidMount() {
         this.setState({
+            peerConnections: [],
             localClient: {
                 id: appStore.getClientId(),
                 userId: appStore.getUserId(),
@@ -96,10 +98,15 @@ export class Canvas extends React.Component<CanvasConfig, State> {
                     Object.entries(layer).map(kv => `${kv[0]}: ${kv[1]}`).forEach(line => stats.push(line));
                 });
                 stats.push(``);
-            })
+            });
+            const peerConnections: string[] = [];
+            Array.from(metrics.peerConnections.values()).forEach(pcMetrics => {
+                Object.entries(pcMetrics).filter(kv => kv[0] !== "label").map(kv => `${pcMetrics.label}.${kv[0]}: ${kv[1]}`).forEach(line => peerConnections.push(line));
+            });
             this.setState({
                 ...this.state,
                 statsCollectingTimeInMs: metrics.statsCollectedInMs,
+                peerConnections,
             });
         };
         MyMonitor.onMetricsUpdated(this.metricsUpdatedListener);
@@ -126,6 +133,12 @@ export class Canvas extends React.Component<CanvasConfig, State> {
     render() {
         return (
             <div>
+                {
+                    (this.state?.peerConnections) 
+                        ? this.state.peerConnections.map(statLine => {
+                            return <div key={uuidv4()}>{statLine}</div>
+                        }) : <></>
+                }   
                 <div>
                 {
                     (this.state?.localClient) ? (

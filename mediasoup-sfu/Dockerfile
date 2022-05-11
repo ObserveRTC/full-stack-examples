@@ -1,4 +1,5 @@
 FROM ubuntu:20.04
+# FROM sitespeedio/node:ubuntu-20.04-nodejs-16.13.2
 
 USER root
 
@@ -49,5 +50,9 @@ COPY [ \
 RUN npm install
 RUN npm install typescript -g
 RUN tsc
+
+# for throttling traffic
+RUN apt-get install -y net-tools iproute2 
+
 # ENV DEBUG="mediasoup*"
 CMD [ "node", "dist/main.js" ]

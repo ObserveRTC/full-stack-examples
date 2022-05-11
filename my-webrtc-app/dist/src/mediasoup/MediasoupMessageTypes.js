@@ -8,5 +8,6 @@ export var MessageTypes = {
     ConsumerCreated: "ConsumerCreated",
     ConsumerRemoved: "ConsumerRemoved",
     RtpCapabilities: "RtpCapabilities",
-    SfuIsReady: "SfuIsReady",
+    SfuStateRequest: "SfuStateRequest",
+    SfuStateResponse: "SfuStateResponse",
 };

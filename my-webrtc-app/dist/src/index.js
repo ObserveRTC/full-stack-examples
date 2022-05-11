@@ -80,7 +80,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, navigator.mediaDevices.enumerateDevices()];
             case 2:
                 mediaDevices = _a.sent();
-                monitor.addMediaDevice.apply(monitor, __spreadArray([], __read(mediaDevices), false));
+                monitor.setMediaDevices.apply(monitor, __spreadArray([], __read(mediaDevices), false));
                 constraints = { 'video': true, 'audio': true };
                 monitor.addMediaConstraints(constraints);
                 return [4 /*yield*/, navigator.mediaDevices.getUserMedia(constraints).catch(function (err) {

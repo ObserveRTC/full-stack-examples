@@ -60,10 +60,6 @@ var iceServers = [{
     }];
 var consumers = new Map();
 var producers = new Map();
-var resolveSfuIsReady = undefined;
-var sfuIsReady = new Promise(function (resolve) {
-    resolveSfuIsReady = resolve;
-});
 export function create(config) {
     return __awaiter(this, void 0, void 0, function () {
         var device, routerRtpCapabilities, sndTransportInfo, rcvTransportInfo, localMediaTrackAddedListener;
@@ -115,9 +111,6 @@ export function create(config) {
                                 }
                             });
                         });
-                    })
-                        .onSfuIsReady(function () {
-                        resolveSfuIsReady();
                     })
                         .onConsumerRemoved(function (_a) {
                         var consumerId = _a.consumerId;
@@ -181,10 +174,58 @@ export function create(config) {
                             }
                         });
                     }); });
-                    return [4 /*yield*/, sfuIsReady];
+                    return [4 /*yield*/, new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                            var isSfuRun, wait;
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        isSfuRun = function () { return __awaiter(_this, void 0, void 0, function () {
+                                            var state;
+                                            return __generator(this, function (_a) {
+                                                switch (_a.label) {
+                                                    case 0: return [4 /*yield*/, comlink.requestSfuState()];
+                                                    case 1:
+                                                        state = (_a.sent()).state;
+                                                        console.log("SfuState is ", state);
+                                                        return [2 /*return*/, state === "run"];
+                                                }
+                                            });
+                                        }); };
+                                        return [4 /*yield*/, isSfuRun()];
+                                    case 1:
+                                        if (_a.sent()) {
+                                            resolve();
+                                            return [2 /*return*/];
+                                        }
+                                        wait = function (tried) {
+                                            if (tried === void 0) { tried = 0; }
+                                            return setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0:
+                                                            if (10 < tried) {
+                                                                throw new Error("Sfu State is not run.");
+                                                            }
+                                                            return [4 /*yield*/, isSfuRun()];
+                                                        case 1:
+                                                            if (_a.sent()) {
+                                                                resolve();
+                                                                return [2 /*return*/];
+                                                            }
+                                                            wait(tried + 1);
+                                                            return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); }, 2000);
+                                        };
+                                        wait();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); })];
                 case 2:
                     _a.sent();
-                    console.log("Sfu is Ready");
                     device = new mediasoup.Device();
                     return [4 /*yield*/, comlink.requestCapabilities()];
                 case 3:

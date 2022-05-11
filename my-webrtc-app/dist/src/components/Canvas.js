@@ -65,6 +65,7 @@ import * as appEvents from "../AppEvents";
 import * as appStore from "../AppStore";
 import * as MyMonitor from "../MyMonitor";
 import { Client } from "./Client";
+import { v4 as uuidv4 } from "uuid";
 var Canvas = /** @class */ (function (_super) {
     __extends(Canvas, _super);
     function Canvas(props) {
@@ -73,6 +74,7 @@ var Canvas = /** @class */ (function (_super) {
     Canvas.prototype.componentDidMount = function () {
         var _this = this;
         this.setState({
+            peerConnections: [],
             localClient: {
                 id: appStore.getClientId(),
                 userId: appStore.getUserId(),
@@ -142,7 +144,12 @@ var Canvas = /** @class */ (function (_super) {
                 });
                 stats.push("");
             });
-            _this.setState(__assign(__assign({}, _this.state), { statsCollectingTimeInMs: metrics.statsCollectedInMs }));
+            var peerConnections = [];
+            Array.from(metrics.peerConnections.values()).forEach(function (pcMetrics) {
+                Object.entries(pcMetrics).map(function (kv) { return kv[0] + ": " + kv[1]; }).forEach(function (line) { return peerConnections.push(line); });
+            });
+            stats.push("");
+            _this.setState(__assign(__assign({}, _this.state), { statsCollectingTimeInMs: metrics.statsCollectedInMs, peerConnections: peerConnections }));
         };
         MyMonitor.onMetricsUpdated(this.metricsUpdatedListener);
     };
@@ -164,16 +171,20 @@ var Canvas = /** @class */ (function (_super) {
         }
     };
     Canvas.prototype.render = function () {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         return (React.createElement("div", null,
-            React.createElement("div", null, ((_a = this.state) === null || _a === void 0 ? void 0 : _a.localClient) ? (React.createElement(Client, { id: this.state.localClient.id, stream: this.state.localClient.stream, playBtn: true, userId: this.state.localClient.userId, muteBtn: true })) : React.createElement(React.Fragment, null)),
-            React.createElement("section", { id: "remoteClients" }, ((_b = this.state) === null || _b === void 0 ? void 0 : _b.remoteClients)
+            ((_a = this.state) === null || _a === void 0 ? void 0 : _a.peerConnections)
+                ? this.state.peerConnections.map(function (statLine) {
+                    return React.createElement("div", { key: uuidv4() }, statLine);
+                }) : React.createElement(React.Fragment, null),
+            React.createElement("div", null, ((_b = this.state) === null || _b === void 0 ? void 0 : _b.localClient) ? (React.createElement(Client, { id: this.state.localClient.id, stream: this.state.localClient.stream, playBtn: true, userId: this.state.localClient.userId, muteBtn: true })) : React.createElement(React.Fragment, null)),
+            React.createElement("section", { id: "remoteClients" }, ((_c = this.state) === null || _c === void 0 ? void 0 : _c.remoteClients)
                 ? Array.from(this.state.remoteClients.values()).map(function (remoteClient) {
                     return React.createElement("div", { key: remoteClient.id },
                         React.createElement(Client, { stream: remoteClient.stream, id: remoteClient.id, userId: remoteClient.userId }));
                 })
                 : React.createElement(React.Fragment, null)),
-            ((_c = this.state) === null || _c === void 0 ? void 0 : _c.statsCollectingTimeInMs) ? React.createElement("h3", null,
+            ((_d = this.state) === null || _d === void 0 ? void 0 : _d.statsCollectingTimeInMs) ? React.createElement("h3", null,
                 "Last Stats collecting time in ms: ",
                 React.createElement("span", null, this.state.statsCollectingTimeInMs)) : React.createElement(React.Fragment, null)));
     };

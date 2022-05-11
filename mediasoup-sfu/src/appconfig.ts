@@ -207,6 +207,25 @@ export const config = ConfigProcessor.from({
         env: 'HOSTNAME',
         arg: 'hostname',
     },
+    mediaUnitId: {
+        doc: 'the media unit id propagated to the observer when the sfu is connected',
+        defaultValue: 'mediasoup-sfu',
+        env: 'MEDIA_UNIT_ID',
+        arg: 'mediaUnitId',
+    },
+    serviceId: {
+        doc: 'the service id propagated to the observer when the sfu is connected',
+        defaultValue: 'myService',
+        env: 'SERVICE_ID',
+        arg: 'serviceId',
+    },
+    outboundLatencyInMs: {
+        doc: 'Give a shell command to tc to set a latency for the outbound packets',
+        format: "number",
+        defaultValue: undefined,
+        env: 'OUTBOUND_LATENCY_IN_MS',
+        arg: 'outboundLatencyInMs',
+    },
     websocketPort: {
         doc: 'The port number for the websocket the server provide to listen',
         format: "number",

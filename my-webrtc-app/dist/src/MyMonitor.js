@@ -9,6 +9,31 @@ var __values = (this && this.__values) || function(o) {
     };
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 import { ClientMonitor } from "@observertc/client-monitor-js";
 import { EventEmitter } from "events";
 import * as appStore from "./AppStore";
@@ -19,6 +44,7 @@ var config = {
     sampler: {
         roomId: appStore.getRoomId(),
         clientId: appStore.getClientId(),
+        userId: appStore.getUserId(),
     },
     sender: {
         format: "json",
@@ -46,13 +72,15 @@ function emitMetricsUpdated(metrics) {
 // lets have fun with metrics
 var traces = new Map();
 monitor.events.onStatsCollected(function () {
-    var e_1, _a, e_2, _b;
+    var e_1, _a, e_2, _b, e_3, _c;
+    var peerConnectionRtts = new Map();
     var metrics = {
+        peerConnections: new Map(),
         statsCollectedInMs: monitor.metrics.collectingTimeInMs,
         tracks: new Map(),
     };
     var _loop_1 = function (inboundRtp) {
-        var _g = inboundRtp.stats, ssrc = _g.ssrc, bytesReceived = _g.bytesReceived, framesDecoded = _g.framesDecoded, framesReceived = _g.framesReceived, kind = _g.kind;
+        var _l = inboundRtp.stats, ssrc = _l.ssrc, bytesReceived = _l.bytesReceived, framesDecoded = _l.framesDecoded, framesReceived = _l.framesReceived, kind = _l.kind;
         var trackId = inboundRtp.getTrackId();
         var traceId = trackId + "-" + ssrc;
         var trace = traces.get(traceId);
@@ -88,23 +116,33 @@ monitor.events.onStatsCollected(function () {
         updateTrace();
     };
     try {
-        for (var _c = __values(monitor.storage.inboundRtps()), _d = _c.next(); !_d.done; _d = _c.next()) {
-            var inboundRtp = _d.value;
+        for (var _d = __values(monitor.storage.inboundRtps()), _e = _d.next(); !_e.done; _e = _d.next()) {
+            var inboundRtp = _e.value;
             _loop_1(inboundRtp);
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
+            if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
         }
         finally { if (e_1) throw e_1.error; }
     }
     var _loop_2 = function (outboundRtp) {
-        var _h = outboundRtp.stats, ssrc = _h.ssrc, bytesSent = _h.bytesSent, framesEncoded = _h.framesEncoded, framesSent = _h.framesSent, kind = _h.kind;
+        var _m = outboundRtp.stats, ssrc = _m.ssrc, bytesSent = _m.bytesSent, framesEncoded = _m.framesEncoded, framesSent = _m.framesSent, kind = _m.kind;
         var trackId = outboundRtp.getTrackId();
         var traceId = trackId + "-" + ssrc;
         var trace = traces.get(traceId);
+        var remoteInboundRtp = outboundRtp.getRemoteInboundRtp();
+        var peerConnection = outboundRtp.getPeerConnection();
+        if (remoteInboundRtp && peerConnection) {
+            var roundTripTime = (remoteInboundRtp.stats || {}).roundTripTime;
+            if (roundTripTime) {
+                var rtts = peerConnectionRtts.get(peerConnection.collectorId) || [];
+                rtts.push(roundTripTime);
+                peerConnectionRtts.set(peerConnection.collectorId, rtts);
+            }
+        }
         var updateTrace = function () { return traces.set(traceId, {
             bytesSent: bytesSent,
             framesEncoded: framesEncoded,
@@ -137,17 +175,39 @@ monitor.events.onStatsCollected(function () {
         updateTrace();
     };
     try {
-        for (var _e = __values(monitor.storage.outboundRtps()), _f = _e.next(); !_f.done; _f = _e.next()) {
-            var outboundRtp = _f.value;
+        for (var _f = __values(monitor.storage.outboundRtps()), _g = _f.next(); !_g.done; _g = _f.next()) {
+            var outboundRtp = _g.value;
             _loop_2(outboundRtp);
         }
     }
     catch (e_2_1) { e_2 = { error: e_2_1 }; }
     finally {
         try {
-            if (_f && !_f.done && (_b = _e.return)) _b.call(_e);
+            if (_g && !_g.done && (_b = _f.return)) _b.call(_f);
         }
         finally { if (e_2) throw e_2.error; }
+    }
+    var median = function (arr) {
+        var middle = Math.floor(arr.length / 2);
+        arr = __spreadArray([], __read(arr), false).sort(function (a, b) { return a - b; });
+        return arr.length % 2 !== 0 ? arr[middle] : (arr[middle - 1] + arr[middle]) / 2;
+    };
+    try {
+        for (var _h = __values(peerConnectionRtts.entries()), _j = _h.next(); !_j.done; _j = _h.next()) {
+            var _k = __read(_j.value, 2), peerConnectionId = _k[0], rtts = _k[1];
+            var rtt = median(rtts);
+            var pcMetrics = {
+                rtt: rtt,
+            };
+            metrics.peerConnections.set(peerConnectionId, pcMetrics);
+        }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (_j && !_j.done && (_c = _h.return)) _c.call(_h);
+        }
+        finally { if (e_3) throw e_3.error; }
     }
     emitMetricsUpdated(metrics);
 });

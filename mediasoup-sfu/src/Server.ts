@@ -34,6 +34,8 @@ interface Builder {
     setRtcMaxPort(value: number): Builder;
     setSfuPeerMinPort(value: number): Builder;
     setSfuPeerMaxPort(value: number): Builder;
+    setMediaUnitId(value: string): Builder;
+    setServiceId(value: string): Builder;
     setAnnouncedIp(value: string): Builder;
     setPort(value: number): Builder;
     setObserverInternalAddress(value: string): Builder;
@@ -79,6 +81,14 @@ export class Server {
             },
             setHostname: (value: string) => {
                 server._hostname = value;
+                return result;
+            },
+            setMediaUnitId: (value: string) => {
+                server._mediaUnitId = value;
+                return result;
+            },
+            setServiceId: (value: string) => {
+                server._serviceId = value;
                 return result;
             },
             setSfuPeers: (...params: [string, string, number][]) => {
@@ -154,6 +164,8 @@ export class Server {
     }
     private _observerInternalAddress?: string;
     private _emitter = new EventEmitter();
+    private _mediaUnitId = "my-media-unit-id";
+    private _serviceId = "my-service-id";
     private _serverIp?: string;
     private _announcedIp?: string;
     private _clients = new Map<string, Client>();
@@ -195,7 +207,7 @@ export class Server {
             rest: {
                 closeIfFailed: true,
                 maxRetries: 15, // we need to give some try if the docker container spins up later
-                urls: [`http://${this._observerInternalAddress}/rest/samples/myService/mediasoup-sfu`],
+                urls: [`http://${this._observerInternalAddress}/rest/samples/${this._serviceId}/${this._mediaUnitId}`],
             }
         });
 

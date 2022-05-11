@@ -122,10 +122,6 @@ var MediasoupComlink = /** @class */ (function () {
                 _url = url;
                 return result;
             },
-            onSfuIsReady: function (listener) {
-                comlink._emitter.on(MessageTypes.SfuIsReady, listener);
-                return result;
-            },
             onConsumerCreated: function (listener) {
                 comlink._emitter.on(ON_CONSUMER_CREATED_EVENT_NAME, listener);
                 return result;
@@ -159,6 +155,12 @@ var MediasoupComlink = /** @class */ (function () {
         return this._sendRequestAndPromise({
             messageType: MessageTypes.CapabilitiesRequest,
             payload: {}
+        });
+    };
+    MediasoupComlink.prototype.requestSfuState = function () {
+        return this._sendRequestAndPromise({
+            messageType: MessageTypes.SfuStateRequest,
+            payload: {},
         });
     };
     MediasoupComlink.prototype.requestCreateProducer = function (_a) {

@@ -10,6 +10,7 @@ const config: ClientMonitor.ClientMonitorConfig = {
     sampler: {
         roomId: appStore.getRoomId(),
         clientId: appStore.getClientId(),
+        userId: appStore.getUserId(),
     },
     sender: {
         format: "json",
@@ -41,8 +42,14 @@ type TrackLayerMetrics = {
 type TrackMetrics = {
     layers: Map<number, TrackLayerMetrics>;
 }
+
+export type PeerConnectionMetrics = {
+    label?: string;
+    rtt?: number;
+}
 export type Metrics = {
-    statsCollectedInMs: number,
+    statsCollectedInMs: number;
+    peerConnections: Map<string, PeerConnectionMetrics>;
     tracks: Map<string, TrackMetrics>;
 }
 export type MetricsListener = (metrics: Metrics) => void;
@@ -62,7 +69,9 @@ function emitMetricsUpdated(metrics: Metrics) {
 // lets have fun with metrics
 const traces = new Map<string, any>();
 monitor.events.onStatsCollected(() => {
+    const peerConnectionRtts = new Map<string, number[]>();
     const metrics: Metrics = {
+        peerConnections: new Map(),
         statsCollectedInMs: monitor.metrics.collectingTimeInMs,
         tracks: new Map(),
     }
@@ -108,6 +117,16 @@ monitor.events.onStatsCollected(() => {
         const trackId = outboundRtp.getTrackId();
         const traceId = `${trackId}-${ssrc}`;
         const trace = traces.get(traceId);
+        const remoteInboundRtp = outboundRtp.getRemoteInboundRtp();
+        const peerConnection = outboundRtp.getPeerConnection();
+        if (remoteInboundRtp && peerConnection) {
+            const { roundTripTime } = remoteInboundRtp.stats || {};
+            if (roundTripTime) {
+                const rtts = peerConnectionRtts.get(peerConnection.collectorId) || [];
+                rtts.push(roundTripTime);
+                peerConnectionRtts.set(peerConnection.collectorId, rtts);
+            }
+        }
         const updateTrace = () => traces.set(traceId, {
             bytesSent,
             framesEncoded,
@@ -138,6 +157,21 @@ monitor.events.onStatsCollected(() => {
         }
         layerMetric.sndKbps = ((bytesSent - trace.bytesSent) * 8) / timeElapsedInMs;
         updateTrace();
+    }
+    const median = (arr: number[]) => {
+        let middle = Math.floor(arr.length / 2);
+          arr = [...arr].sort((a, b) => a - b);
+        return arr.length % 2 !== 0 ? arr[middle] : (arr[middle - 1] + arr[middle]) / 2;
+      };
+    for (const peerConnection of monitor.storage.peerConnections()) {
+        const rtts = peerConnectionRtts.get(peerConnection.collectorId);
+        const rtt = rtts ? median(rtts) : undefined;
+        const peerConnectionId = peerConnection.collectorId;
+        const pcMetrics = {
+            label: peerConnection.collectorLabel,
+            rtt,
+        };
+        metrics.peerConnections.set(peerConnectionId, pcMetrics);
     }
     emitMetricsUpdated(metrics);
 });
