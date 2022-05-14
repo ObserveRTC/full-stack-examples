@@ -37,6 +37,7 @@ interface Builder {
     setMediaUnitId(value: string): Builder;
     setServiceId(value: string): Builder;
     setAnnouncedIp(value: string): Builder;
+    setSfuPeerInternalIp(value?: string): Builder;
     setPort(value: number): Builder;
     setObserverInternalAddress(value: string): Builder;
     build(): Promise<Server>;
@@ -121,6 +122,10 @@ export class Server {
                 server._announcedIp = value;
                 return result;
             },
+            setSfuPeerInternalIp: (value?: string) => {
+                server._sfuPeerListeningIp = value;
+                return result;
+            },
             setPort: (value: number) => {
                 server._port = value;
                 return result;
@@ -148,7 +153,7 @@ export class Server {
                     const sfuPeer = await SfuPeer.builder()
                         .withPeerAddress(peerAddress)
                         .withRouter(router)
-                        .withListeningIp(server._announcedIp, port)
+                        .withListeningIp(server._sfuPeerListeningIp ?? server._announcedIp, port)
                         .withPeerId(peerId)
                         .withStatsCollector(Monitor.statsCollector)
                         .build();
@@ -169,6 +174,7 @@ export class Server {
     private _serverIp?: string;
     private _announcedIp?: string;
     private _clients = new Map<string, Client>();
+    private _sfuPeerListeningIp?: string;
     private _hostname?: string;
     private _worker?: MediasoupWorker;
     private _sfuPeers = new Map<string, SfuPeer>();

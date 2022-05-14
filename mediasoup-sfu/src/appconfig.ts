@@ -282,6 +282,14 @@ export const config = ConfigProcessor.from({
         env: 'SERVER_IP',
         arg: 'serverIp',
     },
+    sfuPeerListeningHost: {
+        doc: 'The hostname the server is linstening for internal peer connections',
+        format: "string",
+        defaultValue: null,
+        env: 'SFUPEER_LISTENING_HOST',
+        arg: 'sfuPeerListeningHost',
+    },
+    
     observerInternalAddress: {
         doc: 'The observer internal address inside the network where the observer relies',
         format: "string",

@@ -40,8 +40,10 @@ async function main(): Promise<void> {
     const serviceId = config.get("serviceId");
     const announcedIp = config.get("announcedIp");
     const outboundLatencyInMs = config.get("outboundLatencyInMs");
+    const sfuPeerListeningHost = config.get("sfuPeerListeningHost");
     const observerInternalAddress = config.get("observerInternalAddress");
     const serverIp = config.get("serverIp") ?? await lookup(hostname);
+    const sfuPeerInternalIp = sfuPeerListeningHost ? await lookup(sfuPeerListeningHost) : undefined;
     logger.info("Server IP", serverIp);
     const sfuPeers: [string, string, number][] = [];
     if (sfuPeersCsv) {
@@ -68,6 +70,7 @@ async function main(): Promise<void> {
         .setSfuPeerMinPort(sfuPeerMinPort)
         .setSfuPeerMaxPort(sfuPeerMaxPort)
         .setMediaUnitId(mediaUnitId)
+        .setSfuPeerInternalIp(sfuPeerInternalIp)
         .setServiceId(serviceId)
         .build();
 
