@@ -52,6 +52,8 @@ services:
       - OUTBOUND_LATENCY_IN_MS=400
       - ANNOUNCED_IP=${SFU_ANNOUNCED_IP}
       - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
+      - SFUPEER_MIN_PORT=6000
+      - SFUPEER_MAX_PORT=6020
       - SFU_PEERS=sfu1_to_sfu2@host.docker.internal:7171
     depends_on:
       - observer
@@ -75,6 +77,8 @@ services:
       - OUTBOUND_LATENCY_IN_MS=400
       - ANNOUNCED_IP=${SFU_ANNOUNCED_IP}
       - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
+      - SFUPEER_MIN_PORT=6030
+      - SFUPEER_MAX_PORT=6050
       - SFU_PEERS=sfu1_to_sfu2@host.docker.internal:5959
     depends_on:
       - observer
