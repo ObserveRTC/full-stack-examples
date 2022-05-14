@@ -6,14 +6,15 @@ import * as appStore from "./AppStore";
 const config: ClientMonitor.ClientMonitorConfig = {
     collectingPeriodInMs: 2000,
     samplingPeriodInMs: 10000,
-    sendingPeriodInMs: 15000,
+    sendingPeriodInMs: appStore.getSamplingPeriodInMs(),
     sampler: {
         roomId: appStore.getRoomId(),
         clientId: appStore.getClientId(),
         userId: appStore.getUserId(),
     },
     sender: {
-        format: "json",
+        // format: "json",
+        format: "protobuf",
         websocket: {
             urls: [
                 "ws://localhost:7080/samples/myService/my-webrtc-app"

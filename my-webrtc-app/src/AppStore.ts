@@ -5,6 +5,8 @@ export type ClientType = "mediasoup";
 let clientType: ClientType | undefined;
 let roomId: string | undefined;
 let sfuAddress: string | undefined;
+let samplingPeriodInMs: number | undefined;
+
 const clientId = uuidv4();
 const userId = getRandomUserId();
 
@@ -17,6 +19,19 @@ export function getRoomId() {
     }
     return roomId;
 }
+
+export function getSamplingPeriodInMs() {
+    if (!samplingPeriodInMs) {
+        const candidate = document.querySelector("span#samplingPeriodInMs");
+        if (candidate?.textContent) {
+            samplingPeriodInMs = parseInt(candidate.textContent);
+        } else {
+            samplingPeriodInMs = 15000;
+        }
+    }
+    return samplingPeriodInMs;
+}
+
 export function getUserId() {
     return userId;
 }
