@@ -4,3 +4,4 @@ keys/*
 package-lock.json
 !package.json
 !tsconfig.json
+shell.txt

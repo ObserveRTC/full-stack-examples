@@ -1,4 +1,4 @@
-import mediasoup from "mediasoup";
+import * as mediasoup from "mediasoup";
 
 export const MessageTypes = {
     CapabilitiesRequest: "CapabilitiesRequest",
@@ -15,6 +15,9 @@ export const MessageTypes = {
     ConsumerCreated: "ConsumerCreated",
     ConsumerRemoved: "ConsumerRemoved",
     RtpCapabilities: "RtpCapabilities",
+    
+    SfuStateRequest: "SfuStateRequest",
+    SfuStateResponse: "SfuStateResponse",
 }
 
 interface Notification {
@@ -46,6 +49,10 @@ export interface CapabilitiesRequest extends Request {
 
 }
 
+export interface SfuStateRequest extends Request {
+
+}
+
 export interface CreateProducerRequest extends Request {
     kind: mediasoup.types.MediaKind;
     rtpParameters: any;
@@ -74,6 +81,10 @@ export interface PauseProducerResponse extends Response {
 
 export interface ResumeProducerResponse extends Response {
 
+}
+
+export interface SfuStateResponse extends Response {
+    state: string;
 }
 
 export interface TransportInfoRequest extends Request {

@@ -10,6 +10,11 @@ observer:
       maxTimeInMs: 1000
 
   sinks:
+    MyLogger:
+      type: LoggerSink
+      config:
+        printTypeSummary: true
+
     MyMongoSink:
       type: MongoSink
       config:

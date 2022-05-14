@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 export type ClientType = "mediasoup";
 let clientType: ClientType | undefined;
 let roomId: string | undefined;
+let sfuAddress: string | undefined;
+let samplingPeriodInMs: number | undefined;
+
 const clientId = uuidv4();
 const userId = getRandomUserId();
 
@@ -16,6 +19,19 @@ export function getRoomId() {
     }
     return roomId;
 }
+
+export function getSamplingPeriodInMs() {
+    if (!samplingPeriodInMs) {
+        const candidate = document.querySelector("span#samplingPeriodInMs");
+        if (candidate?.textContent) {
+            samplingPeriodInMs = parseInt(candidate.textContent);
+        } else {
+            samplingPeriodInMs = 15000;
+        }
+    }
+    return samplingPeriodInMs;
+}
+
 export function getUserId() {
     return userId;
 }
@@ -36,4 +52,14 @@ export function getClientType() {
         }
     }
     return clientType;
+}
+
+export function getSfuAddress() {
+    if (!sfuAddress) {
+        const candidate = document.querySelector("span#sfuAddress");
+        if (candidate) {
+            sfuAddress = candidate.textContent;
+        }
+    }
+    return sfuAddress;
 }

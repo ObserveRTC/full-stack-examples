@@ -1,5 +1,5 @@
 import { EventEmitter, WebSocket } from "ws";
-import { CapabilitiesRequest, CapabilitiesResponse, ConsumerCreatedNotification, MessageTypes, CreateProducerRequest as CreateProducerRequest, CreateProducerResponse as CreateProducerResponse, RtpCapabilitiesNotification, TransportConnectedNotification, TransportInfoRequest, TransportInfoResponse, PauseProducerRequest, ResumeProducerRequest, PauseProducerResponse, ConsumerClosedNotification } from "./MessageTypes";
+import { CapabilitiesRequest, CapabilitiesResponse, ConsumerCreatedNotification, MessageTypes, CreateProducerRequest as CreateProducerRequest, CreateProducerResponse as CreateProducerResponse, RtpCapabilitiesNotification, TransportConnectedNotification, TransportInfoRequest, TransportInfoResponse, PauseProducerRequest, ResumeProducerRequest, PauseProducerResponse, ConsumerClosedNotification, SfuStateResponse, SfuStateRequest } from "./ClientMessageTypes";
 
 const log4js = require('log4js');
 const moduleName = module.filename.slice(__filename.lastIndexOf("/")+1, module.filename.length -3);
@@ -15,6 +15,8 @@ type TransportConnectedListener = (notification: TransportConnectedNotification)
 type RtpCapabilitiesListener = (notification: RtpCapabilitiesNotification) => void;
 type PauseProducerRequestListener = (request: PauseProducerRequest) => void;
 type ResumeProducerRequestListener = (request: ResumeProducerRequest) => void;
+type SfuStateRequestListener = (request: SfuStateRequest) => void;
+
 interface Builder {
     withWebsocket(ws: WebSocket): Builder;
     onCapabilitiesRequested(listener: CapabilitiesRequestListener): Builder;
@@ -24,13 +26,14 @@ interface Builder {
     onTransportInfoRequested(listener: TransportRequestListener): Builder;
     onTransportConnected(listener: TransportConnectedListener): Builder;
     onRtpCapabilities(listener: RtpCapabilitiesListener): Builder;
+    onSfuStateRequested(listener: SfuStateRequestListener): Builder;
     onClosed(listener: () => void): Builder;
-    build(): Promise<Comlink>;
+    build(): Promise<ClientComlink>;
 }
 
-export class Comlink {
+export class ClientComlink {
     public static builder(): Builder {
-        const comlink = new Comlink();
+        const comlink = new ClientComlink();
         const result = {
             withWebsocket: (ws: WebSocket) => {
                 ws.onmessage = event => {
@@ -58,6 +61,10 @@ export class Comlink {
             },
             onTransportInfoRequested: (listener: TransportRequestListener) => {
                 comlink._emitter.on(MessageTypes.TransportInfoRequest, listener);
+                return result;
+            },
+            onSfuStateRequested: (listener: SfuStateRequestListener) => {
+                comlink._emitter.on(MessageTypes.SfuStateRequest, listener);
                 return result;
             },
             onTransportConnected: (listener: TransportConnectedListener) => {
@@ -149,6 +156,14 @@ export class Comlink {
 
     get closed() {
         return this._closed;
+    }
+
+    public respondSfuState(payload: SfuStateResponse): void {
+        const message: string = JSON.stringify({
+            messageType: MessageTypes.SfuStateResponse,
+            payload,
+        });
+        this._ws!.send(message);
     }
 
     public sendConsumerCreatedNotification(payload: ConsumerCreatedNotification): void {

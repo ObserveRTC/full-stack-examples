@@ -19,7 +19,7 @@ const main = async () => {
       document.getElementById("root")
   );
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-  monitor.addMediaDevice(...mediaDevices);
+  monitor.setMediaDevices(...mediaDevices);
   const constraints = {'video':true,'audio':true};
   monitor.addMediaConstraints(constraints);
   const localStream = await navigator.mediaDevices.getUserMedia(constraints).catch(err => {

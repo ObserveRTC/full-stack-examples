@@ -33,7 +33,7 @@ services:
     depends_on:
     - mongodb
 
-  mediasoup_sfu:
+  mediasoup_sfu_1:
     build:
       context: ./mediasoup-sfu
       dockerfile: Dockerfile
@@ -41,17 +41,41 @@ services:
     cap_add:
       - NET_ADMIN
     ports:
-      - 15000-15900:15000-15900/udp
+      - 15000-15100:15000-15100/udp
       - 5959:5959
     environment:
       - HOSTNAME=localhost
       - RTCMIN_PORT=15000
-      - RTCMAX_PORT=15900
+      - RTCMAX_PORT=15100
       - WEBPAGE_PORT=5959
       - SERVER_IP=0.0.0.0
       - OUTBOUND_LATENCY_IN_MS=400
       - ANNOUNCED_IP=${SFU_ANNOUNCED_IP}
       - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
+      - SFU_PEERS=sfu1_to_sfu2@host.docker.internal:7171
+    depends_on:
+      - observer
+  
+  mediasoup_sfu_2:
+    build:
+      context: ./mediasoup-sfu
+      dockerfile: Dockerfile
+    network_mode: bridge
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 15200-15300:15200-15300/udp
+      - 7171:7171
+    environment:
+      - HOSTNAME=localhost
+      - RTCMIN_PORT=15200
+      - RTCMAX_PORT=15300
+      - WEBPAGE_PORT=7171
+      - SERVER_IP=0.0.0.0
+      - OUTBOUND_LATENCY_IN_MS=400
+      - ANNOUNCED_IP=${SFU_ANNOUNCED_IP}
+      - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
+      - SFU_PEERS=sfu1_to_sfu2@host.docker.internal:5959
     depends_on:
       - observer
   webrtc-app:

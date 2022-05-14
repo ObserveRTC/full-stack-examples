@@ -2,6 +2,11 @@ import { SfuMonitor, SenderConfig } from "@observertc/sfu-monitor-js";
 import { EventEmitter } from "ws";
 import { MediasoupCollector } from "@observertc/sfu-monitor-js";
 
+const log4js = require('log4js');
+const moduleName = module.filename.slice(__filename.lastIndexOf("/")+1, module.filename.length -3);
+const logger = log4js.getLogger(moduleName);
+logger.level = 'debug';
+
 SfuMonitor.setLogLevel('info');
 
 const METRICS_UPDATED_EVENT_NAME = "metricsUpdated";
@@ -43,6 +48,10 @@ export function connect(config: SenderConfig) {
     monitor.connect(config);
 }
 
+export function close() {
+    monitor.close();
+}
+
 const traces = new Map();
 let lastCheck = Date.now();
 monitor.events.onStatsCollected(() => {
@@ -64,6 +73,9 @@ monitor.events.onStatsCollected(() => {
         const prevBytesReceived = traces.get(sfuInboundRtpPadEntry.id) || 0;
         totalReceivedBytes += bytesReceived - prevBytesReceived;
         traces.set(sfuInboundRtpPadEntry.id, bytesReceived);
+        // if (sfuInboundRtpPadEntry.stats.internal) {
+        //     logger.info(sfuInboundRtpPadEntry);
+        // }
     }
 
     // calculate total amount of bytes sent
