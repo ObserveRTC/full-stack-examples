@@ -226,6 +226,13 @@ export const config = ConfigProcessor.from({
         env: 'OUTBOUND_LATENCY_IN_MS',
         arg: 'outboundLatencyInMs',
     },
+    peerPort: {
+        doc: 'The port number for the peer socket the server provide to listen',
+        format: "number",
+        defaultValue: undefined,
+        env: 'PEER_PORT',
+        arg: 'peerPort',
+    },
     websocketPort: {
         doc: 'The port number for the websocket the server provide to listen',
         format: "number",
@@ -289,7 +296,6 @@ export const config = ConfigProcessor.from({
         env: 'SFUPEER_LISTENING_HOST',
         arg: 'sfuPeerListeningHost',
     },
-    
     observerInternalAddress: {
         doc: 'The observer internal address inside the network where the observer relies',
         format: "string",

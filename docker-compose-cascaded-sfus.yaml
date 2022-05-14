@@ -1,3 +1,4 @@
+version: '3.3'
 services:
   observer:
     restart: always
@@ -34,16 +35,20 @@ services:
     - mongodb
 
   mediasoup_sfu_1:
+    hostname: sfu_1
     build:
       context: ./mediasoup-sfu
       dockerfile: Dockerfile
-    network_mode: bridge
+    # network_mode: "host"
+    # network_mode: bridge
     cap_add:
       - NET_ADMIN
     ports:
       - 15000-15100:15000-15100/udp
       - 5959:5959
       - 6000:6005
+    networks:
+      - my_net
     environment:
       - HOSTNAME=localhost
       - RTCMIN_PORT=15000
@@ -55,16 +60,24 @@ services:
       - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
       - SFUPEER_MIN_PORT=6000
       - SFUPEER_MAX_PORT=6005
-      - SFUPEER_LISTENING_HOST=host.docker.internal
-      - SFU_PEERS=sfu1_to_sfu2@host.docker.internal:7171
+      - SFUPEER_LISTENING_HOST=sfu_1
+      # - SFU_PEERS=sfu1_to_sfu2@sfu_2:7171
+      - PEER_PORT=5960
+      - SFU_PEERS=sfu1_to_sfu2@sfu_2:7172:socket
     depends_on:
       - observer
   
   mediasoup_sfu_2:
+    hostname: sfu_2
     build:
       context: ./mediasoup-sfu
       dockerfile: Dockerfile
-    network_mode: bridge
+    networks:
+    - my_net
+    # network_mode: bridge
+    # links:
+    #   - mediasoup_sfu_1
+    # network_mode: "host"
     cap_add:
       - NET_ADMIN
     ports:
@@ -82,8 +95,10 @@ services:
       - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
       - SFUPEER_MIN_PORT=6010
       - SFUPEER_MAX_PORT=6015
-      - SFUPEER_LISTENING_HOST=host.docker.internal
-      - SFU_PEERS=sfu1_to_sfu2@host.docker.internal:5959
+      - SFUPEER_LISTENING_HOST=sfu_2
+      # - SFU_PEERS=sfu1_to_sfu2@host.docker.internal:5959
+      - PEER_PORT=7172
+      - SFU_PEERS=sfu1_to_sfu2@sfu_1:5960:socket
     depends_on:
       - observer
   webrtc-app:
@@ -96,4 +111,8 @@ services:
     - 9000:9000
     depends_on:
     - observer
-version: '3.3'
+
+networks:
+  my_net:
+    # Use a custom driver
+    # driver: bridge

@@ -8,6 +8,7 @@ import { CapabilitiesRequest, CreateProducerRequest, PauseProducerRequest, Resum
 import { TransportRole, mediaCodecs } from "./constants";
 import * as Monitor from "./Monitor";
 import { PipedConsumerInfo, SfuPeer } from "./SfuPeer";
+import * as net from "net";
 
 const metrics: Monitor.MonitoredMetrics = {};
 Monitor.onMetricsUpdated(updatedMetrics => {
@@ -29,7 +30,7 @@ type MediasoupRouter = mediasoup.types.Router;
 interface Builder {
     setServerIp(value: string): Builder;
     setHostname(value: string): Builder;
-    setSfuPeers(...params: [string, string, number][]): Builder;
+    setSfuPeers(...params: [string, string, number, "ws" | "socket"][]): Builder;
     setRtcMinPort(value: number): Builder;
     setRtcMaxPort(value: number): Builder;
     setSfuPeerMinPort(value: number): Builder;
@@ -39,6 +40,7 @@ interface Builder {
     setAnnouncedIp(value: string): Builder;
     setSfuPeerInternalIp(value?: string): Builder;
     setPort(value: number): Builder;
+    setPeerPort(value: number): Builder;
     setObserverInternalAddress(value: string): Builder;
     build(): Promise<Server>;
 };
@@ -73,7 +75,7 @@ export class Server {
     public static builder(): Builder {
         let rtcMinPort: number = 5000
         let rtcMaxPort: number = 5900;
-        const sfuPeerAddresses = new Map<string, [string, number]>();
+        const sfuPeerAddresses = new Map<string, [string, number, "ws" | "socket"]>();
         const server = new Server();
         const result = {
             setServerIp: (value: string) => {
@@ -92,9 +94,9 @@ export class Server {
                 server._serviceId = value;
                 return result;
             },
-            setSfuPeers: (...params: [string, string, number][]) => {
-                for (const [peerId, host, port] of params) {
-                    sfuPeerAddresses.set(peerId, [host, port]);
+            setSfuPeers: (...params: [string, string, number, "ws" | "socket"][]) => {
+                for (const [peerId, host, port, conType] of params) {
+                    sfuPeerAddresses.set(peerId, [host, port, conType]);
                 }
                 return result;
             },
@@ -128,6 +130,10 @@ export class Server {
             },
             setPort: (value: number) => {
                 server._port = value;
+                return result;
+            },
+            setPeerPort: (value: number) => {
+                server._peerPort = value;
                 return result;
             },
             build: async () => {
@@ -182,6 +188,8 @@ export class Server {
     private _state: State = State.IDLE;
     private _closed: boolean = false;
     private _port: number = 5959;
+    private _peerPort?: number;
+    private _socketServer?: net.Server;
     private _httpServer?: http.Server;
     private _wsServer?: WebSocketServer;
     private constructor() {
@@ -197,6 +205,7 @@ export class Server {
         logger.info(`The server is being started, state is: ${this._state}`);
         this._httpServer = await this._makeHttpServer();
         this._wsServer = await this._makeWsServer(this._httpServer!);
+        this._socketServer = await this._makeSocketServer();
         await new Promise<void>(resolve => {
             this._httpServer!.listen(this._port, () => {
                 logger.info(`Listening on ${this._port}`);
@@ -219,6 +228,36 @@ export class Server {
 
         this._emitter.emit(ON_SFU_RUN_EVENT_NAME);
         this._setState(State.RUN);
+    }
+
+    private async _makeSocketServer(): Promise<net.Server | undefined> {
+        if (!this._hostname || !this._peerPort) {
+            return;
+        }
+        const server = net.createServer();
+        server.on("connection", socket => {
+            socket.setEncoding('utf8');
+            var clientAddress = `${socket.remoteAddress}:${socket.remotePort}`; 
+            logger.info(`new client connected: ${clientAddress}`); 
+            socket.once('data', (peerId) => {
+                if (typeof peerId !== "string") {
+                    throw new Error(`First message on a socket must be a string`);
+                }
+                // the first message should be the peerId in this case
+                const sfuPeer = this._sfuPeers.get(peerId);
+                if (!sfuPeer) {
+                    throw new Error(`Cannot find sfuPeer ${sfuPeer}`);
+                }
+                logger.info(`Connected socket to ${peerId}`); 
+                sfuPeer.comlink!.setSocket(socket);
+            });
+        });
+        return new Promise<net.Server>(resolve => {
+            server.listen(this._peerPort, this._hostname, () => { 
+                logger.info(`TCP server listening on ${this._hostname}:${this._peerPort}`); 
+                resolve(server);
+            }); 
+        })
     }
 
     public async stop(): Promise<void> {
@@ -673,7 +712,9 @@ export class Server {
             ongoingConnections.push(ongoingConnection);
 
             // the stagering simplicity of who initiate and owns the connestion between two peers
+            
             if (this._port < sfuPeer.peerPort) {
+                logger.info(`Initiating connect to ${sfuPeer.peerPort}`);
                 const connection = sfuPeer.connect();
                 ongoingConnections.push(connection);
             }

@@ -1,5 +1,6 @@
 import { EventEmitter, WebSocket } from "ws";
 import { ClosePipedProducerNotification, CreatePipedProducerRequest, CreatePipedProducerResponse, MessageTypes, PausePipedProducerNotification, PipedTransportConnected, PipedTransportInfoRequest, PipedTransportInfoResponse, ResumePipedProducerNotification } from "./SfuPeerMessageTypes";
+import * as net from "net";
 
 const log4js = require('log4js');
 const moduleName = module.filename.slice(__filename.lastIndexOf("/")+1, module.filename.length -3);
@@ -73,6 +74,7 @@ export class SfuPeerComlink {
 
     private _requests = new Map<string, (data: any) => void>();
     private _ws?: WebSocket;
+    private _socket?: net.Socket;
     private _buffer: string[] = [];
     private _closed: boolean = false;
     private _emitter: EventEmitter = new EventEmitter();
@@ -88,6 +90,9 @@ export class SfuPeerComlink {
         if (this._ws) {
             throw new Error(`Websocket has already been set`);
         }
+        if (this._socket) {
+            throw new Error(`Socket has already been set`);
+        }
         ws.onmessage = event => {
             this._receive(event.data as string);
         };
@@ -97,6 +102,31 @@ export class SfuPeerComlink {
         if (0 < this._buffer.length) {
             for (const message of this._buffer) {
                 this._ws.send(message);
+            }
+            this._buffer = [];
+        }
+        this._emitter.emit(ON_CONNECTED_EVENT_NAME);
+        return this;
+    }
+
+    public setSocket(socket: net.Socket) {
+        if (this._ws) {
+            throw new Error(`Websocket has already been set`);
+        }
+        if (this._socket) {
+            throw new Error(`Socket has already been set`);
+        }
+        socket.on("data", msg => {
+            if (typeof msg !== "string") return;
+            this._receive(msg);
+        });
+        socket.once("close", this.close.bind(this));
+        logger.info(`Socket connection is added to comlink, connection with ${socket.remoteAddress}:${socket.remotePort} is established`);
+
+        this._socket = socket;
+        if (0 < this._buffer.length) {
+            for (const message of this._buffer) {
+                this._socket.write(message);
             }
             this._buffer = [];
         }
@@ -232,10 +262,15 @@ export class SfuPeerComlink {
     }
 
     private _send(message: string) {
-        if (!this._ws) {
+        if (!this._ws && !this._socket) {
             this._buffer.push(message);
             return;
         }
-        this._ws.send(message);
+        if (this._ws) {
+            this._ws.send(message);
+        }
+        if (this._socket) {
+            this._socket.write(message);
+        }
     }
 }

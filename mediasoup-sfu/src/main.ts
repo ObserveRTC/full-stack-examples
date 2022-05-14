@@ -36,6 +36,7 @@ async function main(): Promise<void> {
     const sfuPeerMinPort = config.getAsNumber("sfuPeerMinPort");
     const sfuPeerMaxPort = config.getAsNumber("sfuPeerMaxPort");
     const sfuPeersCsv = config.get("sfuPeers");
+    const peerPort = config.get("peerPort");
     const mediaUnitId = config.get("mediaUnitId");
     const serviceId = config.get("serviceId");
     const announcedIp = config.get("announcedIp");
@@ -45,7 +46,7 @@ async function main(): Promise<void> {
     const serverIp = config.get("serverIp") ?? await lookup(hostname);
     const sfuPeerInternalIp = sfuPeerListeningHost ? await lookup(sfuPeerListeningHost) : undefined;
     logger.info("Server IP", serverIp);
-    const sfuPeers: [string, string, number][] = [];
+    const sfuPeers: [string, string, number, "ws" | "socket"][] = [];
     if (sfuPeersCsv) {
         const splittedSfuPeers = sfuPeersCsv.split(",");
         for (const sfuPeer of splittedSfuPeers) {
@@ -54,7 +55,8 @@ async function main(): Promise<void> {
             const address = array[1].split(":");
             const host = address[0];
             const port = Number.parseInt(address[1]);
-            sfuPeers.push([sfuId, host, port]);
+            const conType = 2 < address.length ? address[2] : "ws";
+            sfuPeers.push([sfuId, host, port, conType]);
             logger.info(`Adding SfuPeer ${sfuId} at ${address}`);
         }
     }
@@ -64,6 +66,7 @@ async function main(): Promise<void> {
         .setObserverInternalAddress(observerInternalAddress)
         .setServerIp(serverIp)
         .setSfuPeers(...sfuPeers)
+        .setPeerPort(peerPort)
         .setAnnouncedIp(announcedIp)
         .setRtcMinPort(rtcMinPort)
         .setRtcMaxPort(rtcMaxPort)

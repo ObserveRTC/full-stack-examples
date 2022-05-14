@@ -4,6 +4,7 @@ import { SfuPeerComlink } from "./SfuPeerComlink";
 import { v4 as uuidv4 } from "uuid";
 import { WebSocket } from "ws";
 import { MediasoupCollector } from "@observertc/sfu-monitor-js";
+import * as net from "net";
 
 const log4js = require('log4js');
 const moduleName = module.filename.slice(__filename.lastIndexOf("/")+1, module.filename.length -3);
@@ -16,6 +17,8 @@ type Consumer = mediasoup.types.Consumer;
 type Producer = mediasoup.types.Producer;
 type ProducerOptions = mediasoup.types.ProducerOptions;
 type ConsumerOptions = mediasoup.types.ConsumerOptions;
+
+type ConType = "socket" | "ws";
 
 export type PipedConsumerInfo = {
     producerId: string,
@@ -38,7 +41,7 @@ const ON_PRODUCER_REMOVED_EVENT_NAME = "ON_PRODUCER_REMOVED_EVENT_NAME";
 interface Builder {
     withPeerId(sfuId: string): Builder;
     withRouter(router: MediasoupRouter): Builder;
-    withPeerAddress([host, port]: [string, number]): Builder;
+    withPeerAddress([host, port]: [string, number, string]): Builder;
     withListeningIp(listenIp: string, port: number): Builder;
     withStatsCollector(value: MediasoupCollector): Builder;
     build(): Promise<SfuPeer>;
@@ -57,7 +60,7 @@ export class SfuPeer {
                 sfuPeer._router = router;
                 return result;
             },
-            withPeerAddress: (peerAddress: [string, number]) => {
+            withPeerAddress: (peerAddress: [string, number, ConType]) => {
                 sfuPeer._peerAddress = peerAddress;
                 return result;
             },
@@ -97,7 +100,7 @@ export class SfuPeer {
     private _consumers: Map<string, Consumer> = new Map();
     private _producers: Map<string, Producer> = new Map();
     private _router?: MediasoupRouter;
-    private _peerAddress?: [string, number];
+    private _peerAddress?: [string, number, ConType];
     private _peerId?: string;
     private _transport?: MediasoupPipeTransport;
     public readonly comlink: SfuPeerComlink;
@@ -177,37 +180,60 @@ export class SfuPeer {
     public async connect(tried = 0): Promise<void> {
         const peerHost = this._peerAddress![0];
         const peerPort = this._peerAddress![1];
-        const address = `ws://${peerHost}:${peerPort}?sfuPeer&peerId=${this._peerId}`;
+        const conType = this._peerAddress![2];
+
+        const address = conType === "ws" ?
+            `ws://${peerHost}:${peerPort}?sfuPeer&peerId=${this._peerId}` :
+            `${[peerHost]}:${peerPort}`
+            ;
         if (this.comlink.connected) {
             // logger.info(`Connection to ${address}  has been established`);
             return;
         }
-        logger.info(`Connecting to ${address}. Tried: ${tried}`);
-        const ws = new WebSocket(address);
-        if (ws.readyState === WebSocket.OPEN) {
-            this.comlink.setWebsocket(ws);
-            return;
-        }
-        ws.onopen = () => {
-            if (!this.comlink.connected) {
-                this.comlink.setWebsocket(ws);
-            }
-        };
-        ws.onerror = () => {
+        
+        const onError = (err: any) => {
             if (5 < tried) {
                 logger.error(`Cannot connect to sfupeer ${address}`);
                 this.close();
                 return;
             }
             const timeoutInMs = Math.random() * 10000 + 2000;
-            logger.warn(`Unsuccessful connection establishment: ${address}. Tried: ${tried}. Next try in ${timeoutInMs}ms`);
+            logger.warn(`Unsuccessful connection establishment: ${address}. Tried: ${tried}. Next try in ${timeoutInMs}ms`, err);
             setTimeout(() => {
+                if (this.comlink.connected) {
+                    return;
+                }
                 this.connect(tried + 1);
             }, timeoutInMs);
-        };
-        return new Promise(resolve => {
-            this._emitter.once(ON_CONNECTED_EVENT_NAME, resolve);
-        })
+        }
+        
+        logger.info(`Connecting to ${address} with ${conType}. Tried: ${tried}`);
+        if (conType === "socket") {
+            const socket = new net.Socket(); 
+            socket.setEncoding('utf8');
+            socket.connect( peerPort, peerHost, () => { 
+                logger.info(`client connected to ${peerHost}:${peerPort}`); 
+                socket.write(this._peerId!); 
+                this.comlink.setSocket(socket);
+            }); 
+    
+            socket.on("error", onError);
+        } else if (conType === "ws") {
+            const ws = new WebSocket(address);
+            if (ws.readyState === WebSocket.OPEN) {
+                this.comlink.setWebsocket(ws);
+                return;
+            }
+            ws.onopen = () => {
+                if (!this.comlink.connected) {
+                    this.comlink.setWebsocket(ws);
+                }
+            };
+            ws.onerror = onError;
+            return new Promise(resolve => {
+                this._emitter.once(ON_CONNECTED_EVENT_NAME, resolve);
+            });
+        }
     }
 
     public *producers(): Generator<Producer, any, undefined> {
