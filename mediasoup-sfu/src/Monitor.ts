@@ -54,6 +54,7 @@ export function close() {
 
 const traces = new Map();
 let lastCheck = Date.now();
+
 monitor.events.onStatsCollected(() => {
     const storage = monitor.storage;
     const metrics: MonitoredMetrics = {};

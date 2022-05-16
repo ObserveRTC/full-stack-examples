@@ -66,8 +66,6 @@ import { Canvas } from "./components/Canvas";
 import * as appEvents from "./AppEvents";
 import * as appStore from "./AppStore";
 import { monitor } from "./MyMonitor";
-// const urlParams = new URLSearchParams(window.location.search);
-// const myParam = urlParams.get('myParam');
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var mediaDevices, constraints, localStream;
     return __generator(this, function (_a) {
@@ -84,6 +82,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 constraints = { 'video': true, 'audio': true };
                 monitor.addMediaConstraints(constraints);
                 return [4 /*yield*/, navigator.mediaDevices.getUserMedia(constraints).catch(function (err) {
+                        console.warn("getUserMedia error", err);
                         monitor.addUserMediaError(err);
                     })];
             case 3:

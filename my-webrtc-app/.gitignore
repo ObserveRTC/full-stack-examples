@@ -7,3 +7,4 @@ gradle*
 keys/
 node_modules/
 purgatory/
+dist/

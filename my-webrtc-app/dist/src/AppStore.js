@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 var clientType;
 var roomId;
 var sfuAddress;
+var samplingPeriodInMs;
 var clientId = uuidv4();
 var userId = getRandomUserId();
 export function getRoomId() {
@@ -13,6 +14,18 @@ export function getRoomId() {
         }
     }
     return roomId;
+}
+export function getSamplingPeriodInMs() {
+    if (!samplingPeriodInMs) {
+        var candidate = document.querySelector("span#samplingPeriodInMs");
+        if (candidate === null || candidate === void 0 ? void 0 : candidate.textContent) {
+            samplingPeriodInMs = parseInt(candidate.textContent);
+        }
+        else {
+            samplingPeriodInMs = 15000;
+        }
+    }
+    return samplingPeriodInMs;
 }
 export function getUserId() {
     return userId;

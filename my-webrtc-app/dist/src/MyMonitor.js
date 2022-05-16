@@ -40,14 +40,15 @@ import * as appStore from "./AppStore";
 var config = {
     collectingPeriodInMs: 2000,
     samplingPeriodInMs: 10000,
-    sendingPeriodInMs: 15000,
+    sendingPeriodInMs: appStore.getSamplingPeriodInMs(),
     sampler: {
         roomId: appStore.getRoomId(),
         clientId: appStore.getClientId(),
         userId: appStore.getUserId(),
     },
     sender: {
-        format: "json",
+        // format: "json",
+        format: "protobuf",
         websocket: {
             urls: [
                 "ws://localhost:7080/samples/myService/my-webrtc-app"
@@ -69,10 +70,34 @@ export function offMetricsUpdated(listener) {
 function emitMetricsUpdated(metrics) {
     emitter.emit(METRICS_UPDATED, metrics);
 }
+monitor.events.onStatsCollected(function () {
+    var e_1, _a;
+    var storage = monitor.storage;
+    try {
+        for (var _b = __values(storage.peerConnections()), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var peerConnection = _c.value;
+            var stats = peerConnection.stats;
+            console.log(peerConnection.id, "stats:", stats);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+});
+monitor.events.onSampleCreated(function (sample) {
+    console.log("Sample is creacted", sample);
+});
+monitor.events.onSampleSent(function () {
+    console.log("Samplea are sent to the observer");
+});
 // lets have fun with metrics
 var traces = new Map();
 monitor.events.onStatsCollected(function () {
-    var e_1, _a, e_2, _b, e_3, _c;
+    var e_2, _a, e_3, _b, e_4, _c;
     var peerConnectionRtts = new Map();
     var metrics = {
         peerConnections: new Map(),
@@ -80,7 +105,7 @@ monitor.events.onStatsCollected(function () {
         tracks: new Map(),
     };
     var _loop_1 = function (inboundRtp) {
-        var _l = inboundRtp.stats, ssrc = _l.ssrc, bytesReceived = _l.bytesReceived, framesDecoded = _l.framesDecoded, framesReceived = _l.framesReceived, kind = _l.kind;
+        var _k = inboundRtp.stats, ssrc = _k.ssrc, bytesReceived = _k.bytesReceived, framesDecoded = _k.framesDecoded, framesReceived = _k.framesReceived, kind = _k.kind;
         var trackId = inboundRtp.getTrackId();
         var traceId = trackId + "-" + ssrc;
         var trace = traces.get(traceId);
@@ -121,15 +146,15 @@ monitor.events.onStatsCollected(function () {
             _loop_1(inboundRtp);
         }
     }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
     finally {
         try {
             if (_e && !_e.done && (_a = _d.return)) _a.call(_d);
         }
-        finally { if (e_1) throw e_1.error; }
+        finally { if (e_2) throw e_2.error; }
     }
     var _loop_2 = function (outboundRtp) {
-        var _m = outboundRtp.stats, ssrc = _m.ssrc, bytesSent = _m.bytesSent, framesEncoded = _m.framesEncoded, framesSent = _m.framesSent, kind = _m.kind;
+        var _l = outboundRtp.stats, ssrc = _l.ssrc, bytesSent = _l.bytesSent, framesEncoded = _l.framesEncoded, framesSent = _l.framesSent, kind = _l.kind;
         var trackId = outboundRtp.getTrackId();
         var traceId = trackId + "-" + ssrc;
         var trace = traces.get(traceId);
@@ -180,12 +205,12 @@ monitor.events.onStatsCollected(function () {
             _loop_2(outboundRtp);
         }
     }
-    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
     finally {
         try {
             if (_g && !_g.done && (_b = _f.return)) _b.call(_f);
         }
-        finally { if (e_2) throw e_2.error; }
+        finally { if (e_3) throw e_3.error; }
     }
     var median = function (arr) {
         var middle = Math.floor(arr.length / 2);
@@ -193,21 +218,24 @@ monitor.events.onStatsCollected(function () {
         return arr.length % 2 !== 0 ? arr[middle] : (arr[middle - 1] + arr[middle]) / 2;
     };
     try {
-        for (var _h = __values(peerConnectionRtts.entries()), _j = _h.next(); !_j.done; _j = _h.next()) {
-            var _k = __read(_j.value, 2), peerConnectionId = _k[0], rtts = _k[1];
-            var rtt = median(rtts);
+        for (var _h = __values(monitor.storage.peerConnections()), _j = _h.next(); !_j.done; _j = _h.next()) {
+            var peerConnection = _j.value;
+            var rtts = peerConnectionRtts.get(peerConnection.collectorId);
+            var rtt = rtts ? median(rtts) : undefined;
+            var peerConnectionId = peerConnection.collectorId;
             var pcMetrics = {
+                label: peerConnection.collectorLabel,
                 rtt: rtt,
             };
             metrics.peerConnections.set(peerConnectionId, pcMetrics);
         }
     }
-    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    catch (e_4_1) { e_4 = { error: e_4_1 }; }
     finally {
         try {
             if (_j && !_j.done && (_c = _h.return)) _c.call(_h);
         }
-        finally { if (e_3) throw e_3.error; }
+        finally { if (e_4) throw e_4.error; }
     }
     emitMetricsUpdated(metrics);
 });

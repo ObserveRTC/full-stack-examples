@@ -173,11 +173,12 @@ export class Client {
     public async makeProducerTransport(options: mediasoup.types.WebRtcTransportOptions): Promise<TransportInfo> {
         const transport: WebRtcTransport = await this._makeTransport(options);
         this._producerTransport = transport;
-
+        
         // -- ObserveRTC integration --
         // add transport to the monitor
         if (this._collector) {
-            this._collector.watchWebRtcTransport(transport, {
+            const collector = this._collector!;
+            collector.watchWebRtcTransport(transport, {
                 pollStats: true,
             });
         }

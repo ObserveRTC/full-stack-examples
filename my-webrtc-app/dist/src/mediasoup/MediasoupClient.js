@@ -263,6 +263,19 @@ export function create(config) {
                             });
                         });
                     });
+                    sndTransport.on("connectionstatechange", function (connectionState) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            if (connectionState === "disconnected" || connectionState === "failed") {
+                                monitor.addExtensionStats({
+                                    type: "ICE_DISCONNECTED",
+                                    payload: JSON.stringify({
+                                        transportId: sndTransport.id,
+                                    })
+                                });
+                            }
+                            return [2 /*return*/];
+                        });
+                    }); });
                     sndTransport.on("produce", function (_a, callback, errback) {
                         var kind = _a.kind, rtpParameters = _a.rtpParameters, appData = _a.appData;
                         return __awaiter(_this, void 0, void 0, function () {

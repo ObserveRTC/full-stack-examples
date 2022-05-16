@@ -146,9 +146,8 @@ var Canvas = /** @class */ (function (_super) {
             });
             var peerConnections = [];
             Array.from(metrics.peerConnections.values()).forEach(function (pcMetrics) {
-                Object.entries(pcMetrics).map(function (kv) { return kv[0] + ": " + kv[1]; }).forEach(function (line) { return peerConnections.push(line); });
+                Object.entries(pcMetrics).filter(function (kv) { return kv[0] !== "label"; }).map(function (kv) { return pcMetrics.label + "." + kv[0] + ": " + kv[1]; }).forEach(function (line) { return peerConnections.push(line); });
             });
-            stats.push("");
             _this.setState(__assign(__assign({}, _this.state), { statsCollectingTimeInMs: metrics.statsCollectedInMs, peerConnections: peerConnections }));
         };
         MyMonitor.onMetricsUpdated(this.metricsUpdatedListener);

@@ -66,7 +66,20 @@ export function offMetricsUpdated(listener: MetricsListener) {
 function emitMetricsUpdated(metrics: Metrics) {
     emitter.emit(METRICS_UPDATED, metrics);
 }
+monitor.events.onStatsCollected(() => {
+    const storage = monitor.storage;
+    for (const peerConnection of storage.peerConnections()) {
+        const { stats } = peerConnection;
+        console.log(peerConnection.id, "stats:", stats);
+    }
+});
+monitor.events.onSampleCreated(sample => {
+    console.log("Sample is creacted", sample);
+});
 
+monitor.events.onSampleSent(() => {
+    console.log("Samplea are sent to the observer");
+});
 // lets have fun with metrics
 const traces = new Map<string, any>();
 monitor.events.onStatsCollected(() => {

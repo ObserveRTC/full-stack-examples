@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as appEvents from "../AppEvents";
 import * as mediasoup from "mediasoup-client";
 import { monitor } from "../MyMonitor";
+import { ClientMonitor } from "@observertc/client-monitor-js";
 
 let comlink: MediasoupComlink | undefined;
 export type MediasoupConfig = {
@@ -157,6 +158,16 @@ export async function create(config: MediasoupConfig) {
             dtlsParameters
         });
         callback();
+    });
+    sndTransport.on("connectionstatechange", async connectionState => {
+        if (connectionState === "disconnected" || connectionState === "failed") {
+            monitor.addExtensionStats({
+                type: "ICE_DISCONNECTED",
+                payload: JSON.stringify({
+                    transportId: sndTransport.id,
+                })
+            })
+        }
     });
     sndTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
         try {

@@ -1,13 +1,13 @@
 services:
-  observer:
-    restart: always
-    image: observertc/observer:1.0.0-beta
-    ports:
-      - 7080:7080
-    environment:
-      - MICRONAUT_CONFIG_FILES=/my-config.yaml
-    volumes:
-      - ./observer-config/config.yaml:/my-config.yaml
+  # observer:
+  #   restart: always
+  #   image: observertc/observer:1.0.0-beta
+  #   ports:
+  #     - 7080:7080
+  #   environment:
+  #     - MICRONAUT_CONFIG_FILES=/my-config.yaml
+  #   volumes:
+  #     - ./observer-config/config.yaml:/my-config.yaml
 
   mongodb:
     image: mongo:4.2
@@ -52,16 +52,18 @@ services:
       - OUTBOUND_LATENCY_IN_MS=400
       - ANNOUNCED_IP=${SFU_ANNOUNCED_IP}
       - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
-    depends_on:
-      - observer
-  webrtc-app:
-    build:
-      context: ./my-webrtc-app
-      dockerfile: Dockerfile
-    environment: 
-      - SAMPLING_PERIOD_IN_MS=10000
-    ports:
-    - 9000:9000
-    depends_on:
-    - observer
+    # depends_on:
+    #   - observer
+
+  # webrtc-app:
+  #   build:
+  #     context: ./my-webrtc-app
+  #     dockerfile: Dockerfile
+  #   environment: 
+  #     - SAMPLING_PERIOD_IN_MS=10000
+  #   ports:
+  #   - 9000:9000
+  
+    # depends_on:
+    # - observer
 version: '3.3'

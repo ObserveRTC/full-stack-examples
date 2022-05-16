@@ -41,6 +41,7 @@ var Client = /** @class */ (function (_super) {
         var _this = this;
         this.videoRef.current.srcObject = this.props.stream;
         this.videoRef.current.play().catch(function (err) {
+            console.warn("video error", err);
             MyMonitor.monitor.addUserMediaError(err);
         });
         this.metricsUpdatedListener = function (metrics) {
