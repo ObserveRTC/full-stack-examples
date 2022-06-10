@@ -6,7 +6,6 @@ import * as appEvents from "./AppEvents";
 import * as appStore from "./AppStore";
 import { monitor } from "./MyMonitor";
 import * as fp from "@fingerprintjs/fingerprintjs";
-import { makeLogger } from "ts-loader/dist/logger";
 
 
 const main = async () => {
@@ -21,7 +20,7 @@ const main = async () => {
   const fingerprint = await fp.load();
   monitor.addExtensionStats({
     type: "USER_FINGERPRINT",
-    payload: (await fingerprint.get()).visitorId,
+    payload: JSON.stringify((await fingerprint.get()).visitorId),
   });
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   monitor.setMediaDevices(...mediaDevices);

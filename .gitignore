@@ -5,5 +5,5 @@ gradle*
 keys/
 node_modules/
 purgatory/
-
+.ipynb_checkpoints/
 my-*.yaml

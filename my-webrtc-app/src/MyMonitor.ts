@@ -78,7 +78,7 @@ monitor.events.onSampleCreated(sample => {
 });
 
 monitor.events.onSampleSent(() => {
-    console.log("Samplea are sent to the observer");
+    console.log("Samples are sent to the observer");
 });
 // lets have fun with metrics
 const traces = new Map<string, any>();

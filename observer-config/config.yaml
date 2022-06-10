@@ -19,6 +19,6 @@ observer:
       type: MongoSink
       config:
         uri: "mongodb://root:password@mongodb:27017"
-        database: "observertc-reports-2"
+        database: "observertc-reports"
         printSummary: true
 

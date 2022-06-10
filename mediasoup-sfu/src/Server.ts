@@ -584,13 +584,13 @@ export class Server {
                 logger.info(`Receiver Transport for ${client?.userId} is ready`);
                 for (const sfuPeer of this._sfuPeers.values()) {
                     for (const producer of sfuPeer.producers()) {
-                        const { userId, clientId } = producer.appData;
+                        const { userId, clientId: providedClientId } = producer.appData;
                         const producerInfo: ProducerInfo = {
                             producerId: producer.id,
                             kind: producer.kind,
                             rtpParameters: producer.rtpParameters,
-                            userId,
-                            clientId,
+                            userId: (userId as string) ?? "userId",
+                            clientId: (providedClientId as string) ?? clientId!,
                         }
                         logger.info(`Consumer ${producer.kind} for ${producerInfo.userId} from peer ${sfuPeer.peerHost}:${sfuPeer.peerPort} is ready to consume`);
                         client!.consume(producerInfo);
