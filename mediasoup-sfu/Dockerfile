@@ -1,4 +1,5 @@
-FROM ubuntu:20.04
+# FROM ubuntu:20.04
+FROM ubuntu:jammy-20220531
 # FROM sitespeedio/node:ubuntu-20.04-nodejs-16.13.2
 
 USER root

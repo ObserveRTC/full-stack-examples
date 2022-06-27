@@ -1,7 +1,7 @@
 {
   "name": "sfu",
   "version": "1.0.0",
-  "description": "Simple Mediasoup SFU for transcribing",
+  "description": "Simple Mediasoup SFU",
   "main": "main.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --pretty --transpile-only src/main.ts",
@@ -26,15 +26,15 @@
     "@observertc/sfu-monitor-js": "^1.0.0-beta.34",
     "@types/ws": "^8.2.2",
     "events": "^3.3.0",
-    "log4js": "^6.4.6",
-    "mediasoup": "^3.9.12",
+    "log4js": "^6.5.2",
+    "mediasoup": "^3.10.0",
     "uuid": "^8.3.2",
-    "ws": "^8.6.0",
+    "ws": "^8.8.0",
     "yargs-parser": "^21.0.0"
   },
   "devDependencies": {
     "@types/uuid": "^8.3.3",
     "ts-node-dev": "^1.1.8",
-    "typescript": "^4.6.4"
+    "typescript": "^4.7.4"
   }
 }
