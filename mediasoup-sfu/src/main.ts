@@ -77,7 +77,7 @@ async function main(): Promise<void> {
     if (outboundLatencyInMs) {
         await new Promise<void>((resolve, reject) => {
             const command = `tc qdisc add dev eth0 root handle 1 netem delay ${outboundLatencyInMs}ms`;
-            logger.debug(`Executing ${command}`);
+            logger.info(`Executing ${command}`);
             exec(command, (error: any, stdout: any, stderr: any) => {
                 if (error) reject(error);
                 else if (stderr) reject(stderr)

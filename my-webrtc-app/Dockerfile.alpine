@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:alpine
 # FROM ubuntu:jammy-20220531
 USER root
 

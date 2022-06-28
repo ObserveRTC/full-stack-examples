@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:alpine
 
 USER root
 
@@ -10,8 +10,7 @@ COPY package.json ./
 
 COPY ./ ./
 
-# RUN apk add --no-cache git make bash python3 py3-pip net-tools gcc alpine-sdk iproute2 linux-headers
-RUN apt-get update && apt-get install -y build-essential python3 python3-pip iproute2 net-tools make
+RUN apk add --no-cache git make bash python3 py3-pip net-tools gcc alpine-sdk iproute2 linux-headers
 RUN npm install
 RUN npm install typescript -g
 RUN tsc
