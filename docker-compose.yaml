@@ -1,4 +1,14 @@
 services:
+  notebooks:
+    restart: always
+    build:
+      context: ./my-notebooks
+      dockerfile: Dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - ./my-notebooks:/home/jovyan/work
+
   observer:
     restart: always
     image: observertc/observer:1.0.0-beta
@@ -34,6 +44,7 @@ services:
     - mongodb
 
   mediasoup_sfu:
+    restart: always
     build:
       context: ./mediasoup-sfu
       dockerfile: Dockerfile
@@ -54,6 +65,7 @@ services:
       - OBSERVER_INTERNAL_ADDRESS=host.docker.internal:7080
     depends_on:
       - observer
+
   webrtc-app:
     build:
       context: ./my-webrtc-app
