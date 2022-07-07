@@ -14,6 +14,7 @@ let rcvTransport: mediasoup.types.Transport | undefined;
 let sndTransport: mediasoup.types.Transport | undefined;
 const iceServers = [{
     urls : ['turn:turn.example.com:443?transport=tcp'],
+    // urls: ['stun:stun.l.google.com:19302'],
     username   : 'example',
     credential : 'example'
 }];
@@ -75,15 +76,15 @@ export async function create(config: MediasoupConfig) {
         .onConsumerRemoved(({ consumerId }) => {
             console.log(`Consumer is closed ${consumerId}`);
             const consumer = consumers.get(consumerId);
-            const { clientId, userId } = consumer.appData;
+            const { clientId, userId }: { clientId?: string, userId?: string} = consumer.appData;
             if (!consumer.closed) {
                 consumer.close();
             }
             const track = consumer.track;
             appEvents.emitRemoteMediaTrackRemoved({
                 track,
-                userId,
-                clientId,
+                userId: userId ?? "userId",
+                clientId: clientId ?? "clientId",
             });
         })
         .build();

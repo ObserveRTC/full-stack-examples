@@ -1,4 +1,14 @@
 services:
+  notebooks:
+    restart: always
+    build:
+      context: ./my-notebooks
+      dockerfile: Dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - ./my-notebooks:/home/jovyan/work
+      
   observer:
     restart: always
     image: observertc/observer:1.0.0-beta

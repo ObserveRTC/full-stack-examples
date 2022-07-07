@@ -10,6 +10,7 @@ export type CanvasConfig = {
 };
 
 type State = {
+    callId?: string,
     peerConnections: string[],
     localClient: ClientConfig,
     remoteClients: Map<string, ClientConfig>,
@@ -100,9 +101,13 @@ export class Canvas extends React.Component<CanvasConfig, State> {
                 stats.push(``);
             });
             const peerConnections: string[] = [];
-            Array.from(metrics.peerConnections.values()).forEach(pcMetrics => {
-                Object.entries(pcMetrics).filter(kv => kv[0] !== "label").map(kv => `${pcMetrics.label}.${kv[0]}: ${kv[1]}`).forEach(line => peerConnections.push(line));
-            });
+            const sndTransportMetricsArray = Array.from(metrics.peerConnections.values()).filter(pc => pc.label === "sndTransport");
+            if (sndTransportMetricsArray) {
+                peerConnections.push(`RTT: ${sndTransportMetricsArray[0].rtt}`);
+            }
+            // Array.from(metrics.peerConnections.values()).forEach(pcMetrics => {
+            //     Object.entries(pcMetrics).filter(kv => kv[0] !== "label").map(kv => `${pcMetrics.label}.${kv[0]}: ${kv[1]}`).forEach(line => peerConnections.push(line));
+            // });
             this.setState({
                 ...this.state,
                 statsCollectingTimeInMs: metrics.statsCollectedInMs,
@@ -133,6 +138,7 @@ export class Canvas extends React.Component<CanvasConfig, State> {
     render() {
         return (
             <div>
+                {/* <span>callId: {(this.state?.callId)}</span> */}
                 {
                     (this.state?.peerConnections) 
                         ? this.state.peerConnections.map(statLine => {

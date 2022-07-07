@@ -1,4 +1,5 @@
-FROM node:alpine
+FROM node:latest
+# FROM ubuntu:jammy-20220531
 USER root
 
 ENV TZ=Europe/Helsinki
