@@ -28,6 +28,11 @@ services:
     ports:
       - 27017:27017
     restart: always
+    healthcheck:
+      test: ["CMD","mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   mongo-express:
     image: mongo-express
@@ -41,7 +46,8 @@ services:
       ME_CONFIG_BASICAUTH_PASSWORD: password
     restart: always
     depends_on:
-    - mongodb
+      mongodb:
+        condition: service_healthy
 
   mediasoup_sfu:
     restart: always
