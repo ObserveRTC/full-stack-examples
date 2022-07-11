@@ -99,7 +99,7 @@ export class MediasoupComlink {
         })
     }
 
-    requestCreateProducer({ kind, rtpParameters, userId }: { kind: string, rtpParameters: any, userId: string }): Promise<CreateProducerResponse> {
+    requestCreateProducer({ kind, rtpParameters, userId }: { kind: string, rtpParameters: any, userId?: string }): Promise<CreateProducerResponse> {
         return this._sendRequestAndPromise<CreateProducerResponse>({
             messageType: MessageTypes.CreateProducerRequest,
             payload: {
