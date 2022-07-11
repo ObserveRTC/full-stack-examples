@@ -172,7 +172,7 @@ export async function create(config: MediasoupConfig) {
     });
     sndTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
         try {
-            const { userId } = appData;
+            const { userId }: { userId: string } = appData;
             const { producerId } = await comlink.requestCreateProducer({
                 kind,
                 rtpParameters,
