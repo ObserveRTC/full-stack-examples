@@ -1,9 +1,8 @@
-import { ClientMonitor, PcStatsCollector } from "@observertc/client-monitor-js";
-import { TrackRelation } from "@observertc/client-monitor-js/lib/Sampler";
+import { ClientMonitorConfig, createClientMonitor } from "@observertc/client-monitor-js";
 import { EventEmitter } from "events";
 import * as appStore from "./AppStore";
 
-const config: ClientMonitor.ClientMonitorConfig = {
+const config: ClientMonitorConfig = {
     collectingPeriodInMs: 2000,
     samplingPeriodInMs: 10000,
     sendingPeriodInMs: appStore.getSamplingPeriodInMs(),
@@ -13,19 +12,17 @@ const config: ClientMonitor.ClientMonitorConfig = {
         userId: appStore.getUserId(),
     },
     sender: {
-        // format: "json",
-        format: "protobuf",
+        format: "json",
+        // format: "protobuf",
         websocket: {
             urls: [
-                "ws://localhost:7080/samples/myService/my-webrtc-app"
+                `ws://${appStore.getObserverHost()}:${appStore.getObserverPort()}/samples/myService/my-webrtc-app`
             ],
             maxRetries: 3,
         }
     }
 }
-
-export const monitor = ClientMonitor.create(config);
-
+export const monitor = createClientMonitor(config);
 
 // define the metrics you want to expose
 const METRICS_UPDATED = "metricsUpdated";
@@ -66,12 +63,13 @@ export function offMetricsUpdated(listener: MetricsListener) {
 function emitMetricsUpdated(metrics: Metrics) {
     emitter.emit(METRICS_UPDATED, metrics);
 }
-monitor.events.onStatsCollected(() => {
-    const storage = monitor.storage;
-    for (const peerConnection of storage.peerConnections()) {
-        const { stats } = peerConnection;
-        console.log(peerConnection.id, "stats:", stats);
-    }
+monitor.events.onStatsCollected(rtcStats => {
+    // const storage = monitor.storage;
+    console.log("polled stats:", rtcStats);
+    // for (const peerConnection of storage.peerConnections()) {
+        // const { stats } = peerConnection;
+        // console.log(peerConnection.id, "stats:", stats);
+    // }
 });
 monitor.events.onSampleCreated(sample => {
     console.log("Sample is creacted", sample);
@@ -80,15 +78,41 @@ monitor.events.onSampleCreated(sample => {
 monitor.events.onSampleSent(() => {
     console.log("Samples are sent to the observer");
 });
+
+
+
+
+monitor.events.onStatsCollected(() => {
+    const storage = monitor.storage;
+
+    for (const inboundRtp of storage.inboundRtps()) {
+        const remoteInbound = inboundRtp.getRemoteOutboundRtp();
+        remoteInbound.stats.roundTripTime
+    }
+});
+
+monitor.events.onSampleCreated(sample => {
+    
+})
+
+
+
+
+
 // lets have fun with metrics
 const traces = new Map<string, any>();
 monitor.events.onStatsCollected(() => {
+
+
     const peerConnectionRtts = new Map<string, number[]>();
     const metrics: Metrics = {
         peerConnections: new Map(),
         statsCollectedInMs: monitor.metrics.collectingTimeInMs,
         tracks: new Map(),
     }
+
+
+
     for (const inboundRtp of monitor.storage.inboundRtps()) {
         const { ssrc, bytesReceived, framesDecoded, framesReceived, kind } = inboundRtp.stats;
         const trackId = inboundRtp.getTrackId();

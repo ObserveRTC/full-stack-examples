@@ -1,18 +1,18 @@
-import { SfuMonitor, SenderConfig } from "@observertc/sfu-monitor-js";
+import { setLogLevel, createMediasoupMonitor, SenderConfig } from "@observertc/sfu-monitor-js";
 import { EventEmitter } from "ws";
-import { MediasoupCollector } from "@observertc/sfu-monitor-js";
 
 const log4js = require('log4js');
 const moduleName = module.filename.slice(__filename.lastIndexOf("/")+1, module.filename.length -3);
 const logger = log4js.getLogger(moduleName);
 logger.level = 'debug';
 
-SfuMonitor.setLogLevel('info');
+setLogLevel('info');
 
 const METRICS_UPDATED_EVENT_NAME = "metricsUpdated";
 const emitter = new EventEmitter();
 
-export const monitor = SfuMonitor.create({
+
+export const monitor = createMediasoupMonitor({
     collectingPeriodInMs: 2000,
     samplingPeriodInMs: 10000,
     sendingPeriodInMs: 15000,
@@ -40,9 +40,6 @@ export function onMetricsUpdated(listener: (metrics: MonitoredMetrics) => void) 
 export function offMetricsUpdated(listener: (metrics: MonitoredMetrics) => void) {
     emitter.off(METRICS_UPDATED_EVENT_NAME, listener);
 }
-
-export const statsCollector = MediasoupCollector.create();
-monitor.addStatsCollector(statsCollector);
 
 export function connect(config: SenderConfig) {
     monitor.connect(config);

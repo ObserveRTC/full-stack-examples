@@ -101,9 +101,10 @@ export class Canvas extends React.Component<CanvasConfig, State> {
                 stats.push(``);
             });
             const peerConnections: string[] = [];
-            const sndTransportMetricsArray = Array.from(metrics.peerConnections.values()).filter(pc => pc.label === "sndTransport");
+            // console.warn(metrics.peerConnections.values());
+            const sndTransportMetricsArray = Array.from(metrics.peerConnections.values()).filter(pc => pc.label === "send");
             if (sndTransportMetricsArray) {
-                peerConnections.push(`RTT: ${sndTransportMetricsArray[0].rtt}`);
+                peerConnections.push(`RTT: ${sndTransportMetricsArray[0]?.rtt}`);
             }
             // Array.from(metrics.peerConnections.values()).forEach(pcMetrics => {
             //     Object.entries(pcMetrics).filter(kv => kv[0] !== "label").map(kv => `${pcMetrics.label}.${kv[0]}: ${kv[1]}`).forEach(line => peerConnections.push(line));

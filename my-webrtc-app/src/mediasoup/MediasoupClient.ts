@@ -1,9 +1,7 @@
 import { MediasoupComlink } from "./MediasoupComlink";
-import { v4 as uuidv4 } from "uuid";
 import * as appEvents from "../AppEvents";
 import * as mediasoup from "mediasoup-client";
 import { monitor } from "../MyMonitor";
-import { ClientMonitor } from "@observertc/client-monitor-js";
 
 let comlink: MediasoupComlink | undefined;
 export type MediasoupConfig = {
@@ -49,14 +47,6 @@ export async function create(config: MediasoupConfig) {
             });
             const track = consumer.track;
 
-            // -- ObserveRTC integration --
-            // bind the track to the corresponded Sfu stream and sink
-            monitor.addTrackRelation({
-                trackId: track.id,
-                sfuStreamId: remoteProducerId,
-                sfuSinkId: consumerId,
-            });
-
             consumers.set(consumer.id, consumer);
             appEvents.emitRemoteMediaTrackAdded({
                 track,
@@ -67,10 +57,6 @@ export async function create(config: MediasoupConfig) {
             consumer.observer.on("close", () => {
                 monitor.removeTrackRelation(track.id);
                 consumers.delete(consumer.id);
-
-                // -- ObserveRTC integration --
-                // unbind the track to the corresponded Sfu stream and sink
-                monitor.removeTrackRelation(track.id);
             });
         })
         .onConsumerRemoved(({ consumerId }) => {
@@ -137,6 +123,10 @@ export async function create(config: MediasoupConfig) {
     })
 
     const device = new mediasoup.Device();
+    
+    // -- ObserveRTC integration --
+    monitor.collectors.addMediasoupDevice(device);
+
     const { rtpCapabilities: routerRtpCapabilities } = await comlink.requestCapabilities();
     console.log(`Got routerCapabilities:`, routerRtpCapabilities);
     await device.load({ routerRtpCapabilities });
@@ -160,16 +150,6 @@ export async function create(config: MediasoupConfig) {
         });
         callback();
     });
-    sndTransport.on("connectionstatechange", async connectionState => {
-        if (connectionState === "disconnected" || connectionState === "failed") {
-            monitor.addExtensionStats({
-                type: "ICE_DISCONNECTED",
-                payload: JSON.stringify({
-                    transportId: sndTransport.id,
-                })
-            })
-        }
-    });
     sndTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
         try {
             const { userId } = appData;
@@ -182,14 +162,6 @@ export async function create(config: MediasoupConfig) {
         } catch (err) {
             errback(err);
         }
-    });
-
-    // -- ObserveRTC integration --
-    // Add stats collector to the monitor
-    monitor.addStatsCollector({
-        id: uuidv4(),
-        label: "sndTransport",
-        getStats: sndTransport.getStats.bind(sndTransport),
     });
 
     const rcvTransportInfo = await comlink.requestTransportInfo({
@@ -208,13 +180,6 @@ export async function create(config: MediasoupConfig) {
         callback();
     });
 
-    // -- ObserveRTC integration --
-    // Add stats collector to the monitor
-    monitor.addStatsCollector({
-        id: uuidv4(),
-        label: "rcvTransport",
-        getStats: rcvTransport.getStats.bind(rcvTransport),
-    });
     const localMediaTrackAddedListener = async (message: appEvents.ClientMediaTrackMessage ) => {
         if (!sndTransport) throw new Error(`SenderTransport is not available`);
         const { track, userId } = message;
@@ -225,21 +190,17 @@ export async function create(config: MediasoupConfig) {
             },
         });
 
-        // -- ObserveRTC integration --
-        // bind the track to the corresponded Sfu stream
-        monitor.addTrackRelation({
-            trackId: track.id,
-            sfuStreamId: producer.id,
-        });
-
         producer.observer.on("close", () => {
             producers.delete(producer.id);
             appEvents.emitLocalMediaTrackRemoved(track.id);
-
-            // -- ObserveRTC integration --
-            // remove binding between the track to the corresponded Sfu stream
-            monitor.removeTrackRelation(track.id);
         });
+        // setInterval(async () => {
+        //     const stats = await producer.getStats();
+        //     stats.forEach((value, key, parent) => {
+        //         console.warn("producer.getStats", value, key, parent);
+        //     })
+            
+        // }, 2000);
         producers.set(producer.id, producer);
     };
     sndTransport.observer.on("close", () => {

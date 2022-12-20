@@ -9,6 +9,7 @@ async function initMediasoup(): Promise<void> {
     const sfuAddress = appStore.getSfuAddress();
     const url = `ws://${sfuAddress}?roomId=${roomId}&userId=${userId}&clientId=${clientId}`;
     console.log(`SfuAddress: ${sfuAddress}, websocket url: ${url}`);
+    
     await MediasoupClient.create({
         url,
     });

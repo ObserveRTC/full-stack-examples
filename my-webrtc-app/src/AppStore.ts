@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 export type ClientType = "mediasoup";
 let clientType: ClientType | undefined;
 let roomId: string | undefined;
+let observerHost: string | undefined;
+let observerPort: number | undefined;
 let sfuAddress: string | undefined;
 let samplingPeriodInMs: number | undefined;
 
@@ -18,6 +20,26 @@ export function getRoomId() {
         }
     }
     return roomId;
+}
+
+export function getObserverHost() {
+    if (!observerHost) {
+        const candidate = document.querySelector("span#observerHost");
+        if (candidate) {
+            observerHost = candidate.textContent;
+        }
+    }
+    return observerHost;
+}
+
+export function getObserverPort() {
+    if (!observerPort) {
+        const candidate = document.querySelector("span#observerPort");
+        if (candidate) {
+            observerPort = Number.parseInt(candidate.textContent);
+        }
+    }
+    return observerPort;
 }
 
 export function getSamplingPeriodInMs() {

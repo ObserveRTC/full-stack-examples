@@ -1,7 +1,6 @@
 import * as mediasoup from "mediasoup";
 import { EventEmitter } from "ws";
 import { TransportInfo } from "./ClientMessageTypes";
-import { MediasoupCollector } from "@observertc/sfu-monitor-js";
 
 const log4js = require('log4js');
 const moduleName = module.filename.slice(__filename.lastIndexOf("/")+1, module.filename.length -3);
@@ -46,7 +45,6 @@ export interface Builder {
     setUserId(value: string): Builder;
     setClientId(value: string): Builder;
     setRouter(value: Router): Builder;
-    setStatsCollector(value: MediasoupCollector): Builder;
     onProducerAdded(listener: ProducerAddedEventListener): Builder;
     onProducerRemoved(listener: ProducerRemovedEventListener): Builder;
     onConsumerAdded(listener: ConsumerEventListener): Builder;
@@ -70,10 +68,6 @@ export class Client {
             },
             setRouter: (router: Router) => {
                 client._router = router;
-                return result;
-            },
-            setStatsCollector: (value: MediasoupCollector) => {
-                client._collector = value;
                 return result;
             },
             onProducerAdded: (listener: ProducerAddedEventListener) => {
@@ -107,7 +101,6 @@ export class Client {
         return result;
     }
     
-    private _collector?: MediasoupCollector;
     private _userId?: string;
     private _emitter: EventEmitter = new EventEmitter();
     private _router?: Router;
@@ -174,14 +167,6 @@ export class Client {
         const transport: WebRtcTransport = await this._makeTransport(options);
         this._producerTransport = transport;
         
-        // -- ObserveRTC integration --
-        // add transport to the monitor
-        if (this._collector) {
-            const collector = this._collector!;
-            collector.watchWebRtcTransport(transport, {
-                pollStats: true,
-            });
-        }
         return {
             id: transport.id,
             iceParameters: transport.iceParameters,
@@ -201,14 +186,6 @@ export class Client {
 
     public async makeConsumerTransport(options: mediasoup.types.WebRtcTransportOptions): Promise<TransportInfo> {
         const transport: WebRtcTransport = await this._makeTransport(options);
-
-        // -- ObserveRTC integration --
-        // add transport to the monitor
-        if (this._collector) {
-            this._collector.watchWebRtcTransport(transport, {
-                pollStats: true,
-            });
-        }
         this._consumerTransport = transport;
         this._emitter.emit(ON_RECEIVER_TRANSPORT_READY_EVENT_NAME);
         return {

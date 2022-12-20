@@ -3,7 +3,6 @@ import { EventEmitter } from "ws";
 import { SfuPeerComlink } from "./SfuPeerComlink";
 import { v4 as uuidv4 } from "uuid";
 import { WebSocket } from "ws";
-import { MediasoupCollector } from "@observertc/sfu-monitor-js";
 
 const log4js = require('log4js');
 const moduleName = module.filename.slice(__filename.lastIndexOf("/")+1, module.filename.length -3);
@@ -40,13 +39,11 @@ interface Builder {
     withRouter(router: MediasoupRouter): Builder;
     withPeerAddress([host, port]: [string, number]): Builder;
     withListeningIp(listenIp: string, port: number): Builder;
-    withStatsCollector(value: MediasoupCollector): Builder;
     build(): Promise<SfuPeer>;
 }
 
 export class SfuPeer {
     public static builder(): Builder {
-        let statsCollector: MediasoupCollector | undefined;
         const sfuPeer = new SfuPeer();
         const result = {
             withPeerId: (value: string) => {
@@ -66,24 +63,15 @@ export class SfuPeer {
                 sfuPeer._port = port;
                 return result;
             },
-            withStatsCollector: (collector: MediasoupCollector) => {
-                statsCollector = collector;
-                return result;
-            },
             build: async () => {
                 if (!sfuPeer._peerAddress) throw new Error(`Cannot create an SfuPeer without a peer address`);
                 if (!sfuPeer._peerId) throw new Error(`Cannot create an SfuPeer without an id`);
                 if (!sfuPeer._router) throw new Error(`Cannot create an SfuPeer without a router`);
-                if (!statsCollector) throw new Error(`StatsCollector is required`);
                 sfuPeer._transport = await sfuPeer._router.createPipeTransport({
                     listenIp: sfuPeer._listenIp!,
                     port: sfuPeer._port!,
                 });
 
-                // --- ObserveRTC integration ---
-                statsCollector.watchPipeTransport(sfuPeer._transport, {
-                    pollStats: true,
-                });
                 logger.info(`SfuPeer has been built for ${sfuPeer.peerHost}:${sfuPeer.peerPort} is built`);
                 return sfuPeer;
             },

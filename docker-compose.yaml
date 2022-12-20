@@ -11,7 +11,7 @@ services:
 
   observer:
     restart: always
-    image: observertc/observer:1.0.0-beta
+    image: observertc/observer:1.0.0
     ports:
       - 7080:7080
     environment:

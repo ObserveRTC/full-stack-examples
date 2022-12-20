@@ -7,6 +7,22 @@ import * as appStore from "./AppStore";
 import { monitor } from "./MyMonitor";
 import * as fp from "@fingerprintjs/fingerprintjs";
 
+// const origPeerConnection = window.RTCPeerConnection;
+// const peerconnection = function (config?: RTCConfiguration) {
+//     const pc = new origPeerConnection(config);
+//     setInterval(async () => {
+//         const stats = await pc.getStats();
+//         stats.forEach((value, key, parent) => {
+//             console.warn("pc stats", key, value, parent);
+//         })
+//     }, 2000);
+//     return pc;
+// };
+
+// // @ts-ignore
+// window.RTCPeerConnection = peerconnection;
+// window.RTCPeerConnection.prototype = origPeerConnection.prototype;
+
 
 const main = async () => {
   await init();

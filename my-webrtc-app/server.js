@@ -20,6 +20,8 @@ app.get('/', function (req, res) {
     .replace("{SFU_HOST}", query?.sfuHost ?? "localhost")
     .replace("{SFU_PORT}", query?.sfuPort ?? 5959)
     .replace("{SAMPLING_PERIOD_IN_MS}", samplingPeriodInMs)
+    .replace("{OBSERVER_HOST}", query.observerHost ?? "localhost")
+    .replace("{OBSERVER_PORT}", query.observerPort ?? 7080)
     ;
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end(clientPage);

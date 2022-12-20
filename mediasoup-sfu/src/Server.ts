@@ -6,11 +6,12 @@ import { Client, ConsumerInfo, ProducerInfo } from "./Client";
 import { v4 as uuidv4 } from "uuid";
 import { CapabilitiesRequest, CreateProducerRequest, PauseProducerRequest, ResumeProducerRequest, RtpCapabilitiesNotification, SfuStateRequest, TransportConnectedNotification, TransportInfo, TransportInfoRequest } from "./ClientMessageTypes";
 import { TransportRole, mediaCodecs } from "./constants";
-import * as Monitor from "./Monitor";
+import { monitor, onMetricsUpdated, MonitoredMetrics, connect as connectToObserver } from "./Monitor";
 import { PipedConsumerInfo, SfuPeer } from "./SfuPeer";
+import { CustomSfuEvent } from "@observertc/sfu-monitor-js";
 
-const metrics: Monitor.MonitoredMetrics = {};
-Monitor.onMetricsUpdated(updatedMetrics => {
+const metrics: MonitoredMetrics = {};
+onMetricsUpdated(updatedMetrics => {
     Object.assign(metrics, updatedMetrics);
 });
 
@@ -132,6 +133,18 @@ export class Server {
             },
             build: async () => {
                 logger.info("Building Server");
+                
+                monitor.watchAll(mediasoup, {
+                    pollConsumerStats: () => false,
+                    pollDataConsumerStats: () => true,
+                    pollProducerStats: () => false,
+                    pollDataProducerStats: () => true,
+                    pollDirectTransportStats: () => true,
+                    pollPipeTransportStats: () => true,
+                    pollWebRtcTransportStats: () => true,
+                    pollPlainRtpTransportStats: () => true,
+                });
+                
                 const worker: MediasoupWorker = await mediasoup.createWorker({
                     rtcMinPort,
                     rtcMaxPort,
@@ -155,7 +168,6 @@ export class Server {
                         .withRouter(router)
                         .withListeningIp(server._sfuPeerListeningIp ?? server._announcedIp, port)
                         .withPeerId(peerId)
-                        .withStatsCollector(Monitor.statsCollector)
                         .build();
                     server._sfuPeers.set(sfuPeer.id, sfuPeer);
                 }
@@ -208,17 +220,28 @@ export class Server {
 
         // -- ObserveRTC integration --
         // connect to observer
-        Monitor.connect({
-            format: "json",
-            rest: {
-                closeIfFailed: true,
+        connectToObserver({
+            format: "protobuf",
+            websocket: {
                 maxRetries: 15, // we need to give some try if the docker container spins up later
-                urls: [`http://${this._observerInternalAddress}/rest/samples/${this._serviceId}/${this._mediaUnitId}`],
-            }
+                urls: [`ws://${this._observerInternalAddress}/samples/${this._serviceId}/${this._mediaUnitId}`],
+                reconnect: true,
+            },
         });
 
         this._emitter.emit(ON_SFU_RUN_EVENT_NAME);
         this._setState(State.RUN);
+
+        const event: CustomSfuEvent = {
+            name: "SFU_INITIALIZED",
+            timestamp: Date.now(),
+            attachments: JSON.stringify({
+                foo: "bar",
+            }),
+        }
+        monitor.addCustomSfuEvent(event);
+
+        
     }
 
     public async stop(): Promise<void> {
@@ -535,7 +558,6 @@ export class Server {
             .setClientId(clientId)
             .setUserId(userId)
             .setRouter(this._router!)
-            .setStatsCollector(Monitor.statsCollector)
             .onProducerAdded(producerInfo => {
                 const { producerId, kind, userId } = producerInfo;
                 logger.info(`Producer ${producerId} kind ${kind} for user ${userId} is added, consume message is broadcasted`);
