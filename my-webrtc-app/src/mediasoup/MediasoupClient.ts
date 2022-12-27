@@ -126,7 +126,7 @@ export async function create(config: MediasoupConfig) {
     
     // -- ObserveRTC integration --
     monitor.collectors.addMediasoupDevice(device);
-
+    
     const { rtpCapabilities: routerRtpCapabilities } = await comlink.requestCapabilities();
     console.log(`Got routerCapabilities:`, routerRtpCapabilities);
     await device.load({ routerRtpCapabilities });
@@ -179,6 +179,11 @@ export async function create(config: MediasoupConfig) {
         });
         callback();
     });
+
+    // -- ObserveRTC integration IF transports are created BEFORE device is added--
+    // const statsCollector = monitor.collectors.addMediasoupDevice(device);
+    // statsCollector.addTransport(rcvTransport);
+    // statsCollector.addTransport(sndTransport);
 
     const localMediaTrackAddedListener = async (message: appEvents.ClientMediaTrackMessage ) => {
         if (!sndTransport) throw new Error(`SenderTransport is not available`);
